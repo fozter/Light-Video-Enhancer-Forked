@@ -1,0 +1,6 @@
+include LICENSE README.md requirements*.txt launcher.py start-gui.bat
+recursive-include light_video_enhancer_forked/bridge *.cpp *.dll *.sh
+recursive-include light_video_enhancer_forked/ffmpeg_bridge *.c *.dll *.sh
+recursive-include light_video_enhancer_forked/ffmpeg_dlls *.dll
+recursive-include light_video_enhancer_forked/fi *.pkl
+recursive-include light_video_enhancer_forked/ncnn *.bin *.dll *.exe *.json *.md *.param *.txt

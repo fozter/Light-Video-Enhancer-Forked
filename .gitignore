@@ -1,0 +1,57 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+
+# Local upstream reference checkouts (kept outside release/source packages)
+references/
+*.egg
+*.spec
+
+# Generated video and debug output
+*_x*.mp4
+*_x*.mkv
+*_x*.mov
+*_f*.mp4
+*_f*.mkv
+*.partial.*
+debug*.png
+
+# IDE and operating system
+.vscode/
+.idea/
+.vs/
+bin/
+obj/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Binary artifacts: keep the packaged runtime only
+*.dll
+*.so
+*.lib
+*.exp
+*.o
+*.obj
+# The FFmpeg shared runtime is fetched with tools/fetch_ffmpeg_runtime.py
+# (avcodec-62.dll exceeds GitHub's 100 MB per-file limit).
+light_video_enhancer_forked/ffmpeg_dlls/
+!light_video_enhancer_forked/ffmpeg_bridge/*.dll
+!light_video_enhancer_forked/bridge/*.dll
+!light_video_enhancer_forked/ncnn/**/*.dll
+
+# Scratch files
+*.orig
+benchmarks/results/**/*.log
+tmp/
+temp/
+tmp_build/
+input.mp4
+*.mp4
+*.mkv
+*.mov
+*.avi

@@ -1,0 +1,584 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Page
+    x:Class="LightVideoEnhancerForked_WinUI.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="using:LightVideoEnhancerForked_WinUI"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Page.Resources>
+        <Style x:Key="CardStyle" TargetType="Border">
+            <Setter Property="Background" Value="{ThemeResource CardBackgroundFillColorDefaultBrush}" />
+            <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="12" />
+            <Setter Property="Padding" Value="20" />
+        </Style>
+        <Style x:Key="SectionTitleStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="20" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+        <Style x:Key="CaptionStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+        <Style x:Key="SmallSpinButtonStyle" TargetType="RepeatButton">
+            <Setter Property="Width" Value="18" />
+            <Setter Property="Height" Value="14" />
+            <Setter Property="MinWidth" Value="0" />
+            <Setter Property="MinHeight" Value="0" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="CornerRadius" Value="3" />
+            <Setter Property="Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}" />
+        </Style>
+    </Page.Resources>
+
+    <NavigationView
+        x:Name="MainNavigation"
+        IsBackButtonVisible="Collapsed"
+        IsSettingsVisible="False"
+        IsPaneToggleButtonVisible="True"
+        PaneDisplayMode="LeftCompact"
+        SelectionChanged="MainNavigation_SelectionChanged">
+        <NavigationView.MenuItems>
+            <NavigationViewItem x:Name="ProcessNavItem" Content="Process" IsSelected="True" Tag="process">
+                <NavigationViewItem.Icon>
+                    <SymbolIcon Symbol="Play" />
+                </NavigationViewItem.Icon>
+            </NavigationViewItem>
+            <NavigationViewItem Content="Models &amp; Downloads" Tag="models">
+                <NavigationViewItem.Icon>
+                    <SymbolIcon Symbol="Download" />
+                </NavigationViewItem.Icon>
+            </NavigationViewItem>
+            <NavigationViewItem x:Name="SettingsNavItem" Content="Settings" Tag="settings">
+                <NavigationViewItem.Icon>
+                    <SymbolIcon Symbol="Setting" />
+                </NavigationViewItem.Icon>
+            </NavigationViewItem>
+            <NavigationViewItem Content="About" Tag="about">
+                <NavigationViewItem.Icon>
+                    <SymbolIcon Symbol="Help" />
+                </NavigationViewItem.Icon>
+            </NavigationViewItem>
+        </NavigationView.MenuItems>
+
+        <Grid Padding="24,16,24,24">
+            <ScrollViewer x:Name="ProcessView" HorizontalScrollBarVisibility="Disabled"
+                          HorizontalContentAlignment="Stretch">
+                <StackPanel MaxWidth="1180" HorizontalAlignment="Center" Spacing="16">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Spacing="4">
+                            <TextBlock FontSize="30" FontWeight="SemiBold" Text="Video Enhancement" />
+                            <TextBlock Style="{StaticResource CaptionStyle}"
+                                       Text="Combine super-resolution, frame interpolation, and hardware encoding in a separate process. CUDA / Vulkan runtimes are not left in the main process when the UI closes or is cancelled." />
+                        </StackPanel>
+                        <Border Grid.Column="1" Margin="20,4,0,0" Padding="10,5"
+                                Background="{ThemeResource AccentFillColorSecondaryBrush}" CornerRadius="12"
+                                VerticalAlignment="Top">
+                            <TextBlock x:Name="BackendBadgeText" FontWeight="SemiBold" Text="Connecting to backend..." />
+                        </Border>
+                    </Grid>
+
+                    <InfoBar x:Name="BackendInfoBar" IsOpen="False" IsClosable="True"
+                             Visibility="Collapsed" Closed="BackendInfoBar_Closed" />
+
+                    <Border Style="{StaticResource CardStyle}" AllowDrop="True"
+                            DragOver="InputCard_DragOver" Drop="InputCard_Drop">
+                        <StackPanel Spacing="14">
+                            <StackPanel Spacing="3">
+                                <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Input &amp; Output" />
+                                <TextBlock Style="{StaticResource CaptionStyle}" Text="Drag video files directly to this card. Output filename is suggested automatically after selecting input." />
+                            </StackPanel>
+                            <Grid ColumnSpacing="10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBox x:Name="InputPathBox" Header="Input Video" PlaceholderText="Select or drag video file"
+                                         TextChanged="InputPathBox_TextChanged" />
+                                <Button Grid.Column="1" Margin="0,26,0,0" Click="BrowseInput_Click" Content="Browse..." />
+                            </Grid>
+                            <Grid ColumnSpacing="10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBox x:Name="OutputPathBox" Header="Output File" PlaceholderText="Leave empty to auto-generate" />
+                                <Button Grid.Column="1" Margin="0,26,0,0" Click="BrowseOutput_Click" Content="Save As..." />
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Border Style="{StaticResource CardStyle}">
+                            <StackPanel Spacing="12">
+                                <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Super Resolution" />
+                                <ComboBox x:Name="SrEngineBox" Header="Engine"
+                                          SelectionChanged="QualitySelection_Changed" HorizontalAlignment="Stretch">
+                                    <ComboBoxItem Content="D3D11 Driver VSR" Tag="dxva_vsr" />
+                                    <ComboBoxItem x:Name="NvVfxSrItem" Content="NVIDIA Video Effects VSR"
+                                                  Tag="nvvfx" IsEnabled="False" />
+                                    <ComboBoxItem x:Name="SpanSrItem" Content="SPAN ncnn-vulkan"
+                                                  Tag="span" IsEnabled="False" />
+                                    <ComboBoxItem x:Name="FlashVsrSrItem" Content="FlashVSR v1.1 (Experimental)"
+                                                  Tag="flashvsr" IsEnabled="False" />
+                                    <ComboBoxItem x:Name="SeedVr2SrItem" Content="SeedVR2 3B FP8 (Heavy Restoration)"
+                                                  Tag="seedvr2" IsEnabled="False" />
+                                    <ComboBoxItem x:Name="DloralSrItem" Content="DLoRAL 4x (Experimental Heavy Restoration)"
+                                                  Tag="dloral" IsEnabled="False" />
+                                    <ComboBoxItem x:Name="OsdEnhancerSrItem" Content="OSDEnhancer 4x/2x (Joint Heavy Restoration)"
+                                                  Tag="osdenhancer" IsEnabled="False" />
+                                    <ComboBoxItem x:Name="SparkVsrSrItem" Content="SparkVSR Stage-2 4x (Keyframe Heavy Restoration)"
+                                                  Tag="sparkvsr" IsEnabled="False" />
+                                    <ComboBoxItem x:Name="RealCuganSrItem" Content="Real-CUGAN ncnn-vulkan" Tag="realcugan" />
+                                    <ComboBoxItem x:Name="RealesrganSrItem" Content="Real-ESRGAN ncnn-vulkan" Tag="realesrgan" />
+                                    <ComboBoxItem x:Name="EsrganSrItem" Content="ESRGAN Classic ncnn" Tag="esrgan" />
+                                    <ComboBoxItem Content="Lanczos" Tag="lanczos" />
+                                    <ComboBoxItem Content="Bicubic" Tag="bicubic" />
+                                    <ComboBoxItem Content="No Resolution Change" Tag="none" IsSelected="True" />
+                                </ComboBox>
+                                <Grid ColumnSpacing="12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <NumberBox x:Name="ScaleBox" Header="Scale" Value="2" Minimum="1" Maximum="4"
+                                                   SmallChange="0.25" SpinButtonPlacementMode="Hidden" Style="{StaticResource CompactNumberBoxStyle}" />
+                                        <StackPanel Grid.Column="1" VerticalAlignment="Bottom" Spacing="1" Margin="4,0,0,3">
+                                            <RepeatButton Style="{StaticResource SmallSpinButtonStyle}" Tag="ScaleBox;u" Click="NumberSpin_Click">
+                                                <FontIcon Glyph="&#xE70E;" FontSize="8" />
+                                            </RepeatButton>
+                                            <RepeatButton Style="{StaticResource SmallSpinButtonStyle}" Tag="ScaleBox;d" Click="NumberSpin_Click">
+                                                <FontIcon Glyph="&#xE70D;" FontSize="8" />
+                                            </RepeatButton>
+                                        </StackPanel>
+                                    </Grid>
+                                    <ComboBox x:Name="SrQualityBox" Grid.Column="1" Header="Quality" SelectedIndex="2"
+                                              ToolTipService.ToolTip="Only affects super-resolution engines that support quality tiers.">
+                                        <ComboBoxItem Content="Fast" Tag="fast" />
+                                        <ComboBoxItem Content="Balanced" Tag="balanced" />
+                                        <ComboBoxItem Content="Quality" Tag="quality" />
+                                        <ComboBoxItem Content="Ultra" Tag="ultra" />
+                                    </ComboBox>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Grid.Column="1" Style="{StaticResource CardStyle}">
+                            <StackPanel Spacing="12">
+                                <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Frame Interpolation" />
+                                <ComboBox x:Name="FiEngineBox" Header="Engine"
+                                          SelectionChanged="QualitySelection_Changed" HorizontalAlignment="Stretch">
+                                    <ComboBoxItem x:Name="RifeFiItem" Content="RIFE AI (PyTorch)"
+                                                  Tag="rife" IsEnabled="False" />
+                                    <ComboBoxItem x:Name="EmaVfiFiItem" Content="EMA-VFI Small (PyTorch CUDA)"
+                                                  Tag="ema_vfi" IsEnabled="False" />
+                                    <ComboBoxItem x:Name="VfiMambaFiItem" Content="VFIMamba S / Full (PyTorch CUDA)"
+                                                  Tag="vfimamba" IsEnabled="False" />
+                                    <ComboBoxItem x:Name="RifeNcnnFiItem" Content="RIFE ncnn-vulkan"
+                                                  Tag="rife_ncnn"
+                                                  ToolTipService.ToolTip="Portable Vulkan interpolation. Pick the model in the Model dropdown: the bundled 4.27 (FluidFrames), or the optional 4.20-4.26 models from Models &amp; Downloads." />
+                                    <ComboBoxItem x:Name="IfrNetFiItem" Content="IFRNet ncnn-vulkan"
+                                                  Tag="ifrnet_ncnn" IsEnabled="False" />
+                                    <ComboBoxItem Content="DIS Dense Optical Flow" Tag="dis" />
+                                    <ComboBoxItem Content="Farneback Optical Flow" Tag="optical_flow" />
+                                    <ComboBoxItem x:Name="TorchFlowFiItem" Content="CUDA Block Matching Optical Flow"
+                                                  Tag="torch_flow" IsEnabled="False" />
+                                    <ComboBoxItem Content="Fast Frame Blend" Tag="blend" />
+                                    <ComboBoxItem Content="No Interpolation" Tag="none" IsSelected="True" />
+                                </ComboBox>
+                                <Grid ColumnSpacing="12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <ComboBox x:Name="FiRateBox" Header="Frame Rate" SelectedIndex="0"
+                                              ToolTipService.ToolTip="Interpolate by a 2x/3x/4x multiple of the source rate, or target an exact output rate (the smallest grid that covers it is used and frames are added or dropped to preserve duration).">
+                                        <ComboBoxItem Content="Source ×2" Tag="mult:2" />
+                                        <ComboBoxItem Content="Source ×3" Tag="mult:3" />
+                                        <ComboBoxItem Content="Source ×4" Tag="mult:4" />
+                                        <ComboBoxItem Content="15" Tag="15" />
+                                        <ComboBoxItem Content="20" Tag="20" />
+                                        <ComboBoxItem Content="23.976 (24000/1001)" Tag="24000/1001" />
+                                        <ComboBoxItem Content="24" Tag="24" />
+                                        <ComboBoxItem Content="25" Tag="25" />
+                                        <ComboBoxItem Content="29.97 (30000/1001)" Tag="30000/1001" />
+                                        <ComboBoxItem Content="30" Tag="30" />
+                                        <ComboBoxItem Content="47.952 (48000/1001)" Tag="48000/1001" />
+                                        <ComboBoxItem Content="50" Tag="50" />
+                                        <ComboBoxItem Content="59.94 (60000/1001)" Tag="60000/1001" />
+                                        <ComboBoxItem Content="60" Tag="60" />
+                                        <ComboBoxItem Content="100" Tag="100" />
+                                        <ComboBoxItem Content="120" Tag="120" />
+                                        <ComboBoxItem Content="144" Tag="144" />
+                                        <ComboBoxItem Content="240" Tag="240" />
+                                        <ComboBoxItem Content="480" Tag="480" />
+                                    </ComboBox>
+                                    <ComboBox x:Name="FiQualityBox" Grid.Column="1" Header="Quality" SelectedIndex="2"
+                                              ToolTipService.ToolTip="Optical flow engines support quality tiers; RIFE models use their own fixed parameters.">
+                                        <ComboBoxItem Content="Fast" Tag="fast" />
+                                        <ComboBoxItem Content="Balanced" Tag="balanced" />
+                                        <ComboBoxItem Content="Quality" Tag="quality" />
+                                        <ComboBoxItem Content="Ultra" Tag="ultra" />
+                                    </ComboBox>
+                                </Grid>
+                                <CheckBox x:Name="SrFirstCheck" Content="Super-res first, then interpolate (higher VRAM usage)" />
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <Border x:Name="SparkReferenceCard" Style="{StaticResource CardStyle}"
+                            Visibility="Collapsed">
+                        <StackPanel Spacing="12">
+                            <StackPanel Spacing="3">
+                                <TextBlock Style="{StaticResource SectionTitleStyle}"
+                                           Text="SparkVSR Reference Keyframes (Optional)" />
+                                <TextBlock Style="{StaticResource CaptionStyle}"
+                                           Text="Leave empty for no-reference mode. Reference images in the directory are sorted by filename, must correspond 1:1 with source frame numbers, be at least 4 frames apart, and match the 4x output resolution exactly." />
+                            </StackPanel>
+                            <Grid ColumnSpacing="10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBox x:Name="SparkReferencePathBox" Header="High-Quality Reference Image or Directory"
+                                         PlaceholderText="Leave empty for no-ref; directory can contain multiple reference images" />
+                                <Button Grid.Column="1" Margin="0,26,0,0"
+                                        Click="BrowseSparkReference_Click" Content="Select Directory..." />
+                            </Grid>
+                            <Grid ColumnSpacing="12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="2*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <TextBox x:Name="SparkReferenceIndicesBox" Header="Corresponding Source Frame Indices"
+                                         PlaceholderText="e.g., 0,48,96" />
+                                <Grid Grid.Column="1">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <NumberBox x:Name="SparkReferenceGuidanceBox" Header="Reference Guidance Strength" Value="1" Minimum="0" Maximum="4"
+                                               SmallChange="0.1" SpinButtonPlacementMode="Hidden" Style="{StaticResource CompactNumberBoxStyle}" />
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Bottom" Spacing="1" Margin="4,0,0,3">
+                                        <RepeatButton Style="{StaticResource SmallSpinButtonStyle}" Tag="SparkReferenceGuidanceBox;u" Click="NumberSpin_Click">
+                                            <FontIcon Glyph="&#xE70E;" FontSize="8" />
+                                        </RepeatButton>
+                                        <RepeatButton Style="{StaticResource SmallSpinButtonStyle}" Tag="SparkReferenceGuidanceBox;d" Click="NumberSpin_Click">
+                                            <FontIcon Glyph="&#xE70D;" FontSize="8" />
+                                        </RepeatButton>
+                                    </StackPanel>
+                                </Grid>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Style="{StaticResource CardStyle}">
+                        <StackPanel Spacing="14">
+                                <StackPanel Spacing="3">
+                                    <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Encoding, Device &amp; Segments" />
+                                    <TextBlock Style="{StaticResource CaptionStyle}" Text="Auto encoder selects available hardware backend based on GPU vendor, with fallback within the same format." />
+                                </StackPanel>
+                            <StackPanel Spacing="14">
+                                <Grid ColumnSpacing="12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="1.25*" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <ComboBox x:Name="CodecBox" Header="Encoder" SelectedIndex="0"
+                                              SelectionChanged="CodecBox_SelectionChanged">
+                                        <ComboBoxItem Content="Auto" Tag="auto" />
+                                        <ComboBoxItem Content="H.264 NVIDIA" Tag="h264_nvenc" />
+                                        <ComboBoxItem Content="H.264 AMD" Tag="h264_amf" />
+                                        <ComboBoxItem Content="H.264 Media Foundation" Tag="h264_mf" />
+                                        <ComboBoxItem Content="x264 (CPU)" Tag="libx264" />
+                                        <ComboBoxItem Content="HEVC / H.265 NVIDIA" Tag="hevc_nvenc" />
+                                        <ComboBoxItem Content="HEVC / H.265 AMD" Tag="hevc_amf" />
+                                        <ComboBoxItem Content="HEVC Media Foundation" Tag="hevc_mf" />
+                                        <ComboBoxItem Content="x265 (CPU)" Tag="libx265" />
+                                        <ComboBoxItem Content="AV1 NVIDIA" Tag="av1_nvenc" />
+                                        <ComboBoxItem Content="AV1 AMD" Tag="av1_amf" />
+                                        <ComboBoxItem Content="SVT-AV1 (CPU)" Tag="libsvtav1" />
+                                        <ComboBoxItem Content="libaom AV1 (CPU)" Tag="libaom-av1" />
+                                        <ComboBoxItem Content="MPEG-4" Tag="mpeg4" />
+                                        <ComboBoxItem Content="FFV1 (Lossless)" Tag="ffv1" />
+                                    </ComboBox>
+                                    <TextBox x:Name="PresetBox" Grid.Column="1" Header="Preset" Text="balanced" />
+                                    <Grid Grid.Column="2">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <NumberBox x:Name="CrfBox" Header="CQ / CRF" Value="23" Minimum="0" Maximum="63"
+                                                   SmallChange="1" SpinButtonPlacementMode="Hidden" Style="{StaticResource CompactNumberBoxStyle}" />
+                                        <StackPanel Grid.Column="1" VerticalAlignment="Bottom" Spacing="1" Margin="4,0,0,3">
+                                            <RepeatButton Style="{StaticResource SmallSpinButtonStyle}" Tag="CrfBox;u" Click="NumberSpin_Click">
+                                                <FontIcon Glyph="&#xE70E;" FontSize="8" />
+                                            </RepeatButton>
+                                            <RepeatButton Style="{StaticResource SmallSpinButtonStyle}" Tag="CrfBox;d" Click="NumberSpin_Click">
+                                                <FontIcon Glyph="&#xE70D;" FontSize="8" />
+                                            </RepeatButton>
+                                        </StackPanel>
+                                    </Grid>
+                                    <ComboBox x:Name="ContainerBox" Grid.Column="3" Header="Container" SelectedIndex="0"
+                                              SelectionChanged="ContainerBox_SelectionChanged">
+                                        <ComboBoxItem Content="MP4" Tag="mp4" />
+                                        <ComboBoxItem Content="MKV" Tag="mkv" />
+                                        <ComboBoxItem Content="MOV" Tag="mov" />
+                                    </ComboBox>
+                                </Grid>
+                                <Grid ColumnSpacing="12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <ComboBox x:Name="NcnnGpuBox" Header="NCNN Device" SelectedIndex="0">
+                                        <ComboBoxItem Content="Auto" Tag="auto" />
+                                        <ComboBoxItem Content="CPU" Tag="cpu" />
+                                    </ComboBox>
+                                    <TextBox x:Name="StartTimeBox" Grid.Column="1" Header="Start (s)" PlaceholderText="Optional" />
+                                    <TextBox x:Name="DurationBox" Grid.Column="2" Header="Duration (s)" PlaceholderText="Optional" />
+                                    <StackPanel Grid.Column="3" Padding="0,25,0,0" Spacing="5">
+                                        <CheckBox x:Name="CopyAudioCheck" IsChecked="True" Content="Copy Source Audio" />
+                                        <CheckBox x:Name="OverwriteCheck" IsChecked="False" Content="Overwrite Existing Output" />
+                                    </StackPanel>
+                                </Grid>
+                                <Grid ColumnSpacing="10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox x:Name="TorchPythonBox" Header="External PyTorch / CUDA Python (Optional)"
+                                             PlaceholderText="Auto-detect, or specify python.exe" />
+                                    <Button Grid.Column="1" Margin="0,26,0,0" Click="BrowseTorchPython_Click" Content="Select..." />
+                                </Grid>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Style="{StaticResource CardStyle}">
+                        <StackPanel Spacing="12">
+                            <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Scene &amp; Static Frame Detection" />
+                            <TextBlock Style="{StaticResource CaptionStyle}"
+                                       Text="Thresholds for detecting static frames and scene cuts. Lower values = more sensitive." />
+                            <Grid ColumnSpacing="12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <NumberBox x:Name="SsimIdenticalBox" Header="Static Frame Threshold" Value="0.9995" Minimum="0.9" Maximum="1.0"
+                                               SmallChange="0.0001" SpinButtonPlacementMode="Hidden" Style="{StaticResource CompactNumberBoxStyle}" />
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Bottom" Spacing="1" Margin="4,0,0,3">
+                                        <RepeatButton Style="{StaticResource SmallSpinButtonStyle}" Tag="SsimIdenticalBox;u" Click="NumberSpin_Click">
+                                            <FontIcon Glyph="&#xE70E;" FontSize="8" />
+                                        </RepeatButton>
+                                        <RepeatButton Style="{StaticResource SmallSpinButtonStyle}" Tag="SsimIdenticalBox;d" Click="NumberSpin_Click">
+                                            <FontIcon Glyph="&#xE70D;" FontSize="8" />
+                                        </RepeatButton>
+                                    </StackPanel>
+                                </Grid>
+                                <Grid Grid.Column="1">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <NumberBox x:Name="SsimSceneCutBox" Header="Scene Cut Threshold" Value="0.20" Minimum="0.0" Maximum="1.0"
+                                               SmallChange="0.0001" SpinButtonPlacementMode="Hidden" Style="{StaticResource CompactNumberBoxStyle}" />
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Bottom" Spacing="1" Margin="4,0,0,3">
+                                        <RepeatButton Style="{StaticResource SmallSpinButtonStyle}" Tag="SsimSceneCutBox;u" Click="NumberSpin_Click">
+                                            <FontIcon Glyph="&#xE70E;" FontSize="8" />
+                                        </RepeatButton>
+                                        <RepeatButton Style="{StaticResource SmallSpinButtonStyle}" Tag="SsimSceneCutBox;d" Click="NumberSpin_Click">
+                                            <FontIcon Glyph="&#xE70D;" FontSize="8" />
+                                        </RepeatButton>
+                                    </StackPanel>
+                                </Grid>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Style="{StaticResource CardStyle}">
+                        <StackPanel Spacing="12">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Spacing="3">
+                                    <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Task" />
+                                    <TextBlock x:Name="StatusText" Style="{StaticResource CaptionStyle}" Text="Ready" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                                    <Button x:Name="OpenOutputButton" Click="OpenOutput_Click" Content="Open Output Location" IsEnabled="False" />
+                                    <Button x:Name="CancelButton" Click="Cancel_Click" Content="Cancel" IsEnabled="False" />
+                                    <Button x:Name="StartButton" Style="{StaticResource AccentButtonStyle}"
+                                            Click="Start_Click" Content="Start Processing" />
+                                </StackPanel>
+                            </Grid>
+                            <ProgressBar x:Name="TaskProgress" Minimum="0" Maximum="100" Value="0" />
+                            <TextBox x:Name="LogBox" Height="230" IsReadOnly="True" AcceptsReturn="True"
+                                     TextWrapping="NoWrap" FontFamily="Consolas" FontSize="12"
+                                     ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                                     ScrollViewer.VerticalScrollBarVisibility="Auto" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+
+            <ScrollViewer x:Name="ModelsView" Visibility="Collapsed" HorizontalScrollBarVisibility="Disabled"
+                          HorizontalContentAlignment="Stretch">
+                <StackPanel MaxWidth="1000" HorizontalAlignment="Center" Spacing="16">
+        <StackPanel Spacing="4">
+            <TextBlock x:Name="ModelsTitle" FontSize="30" FontWeight="SemiBold" Text="Models &amp; Downloads" />
+            <TextBlock x:Name="ModelsDescription" Style="{StaticResource CaptionStyle}"
+                       Text="Lite package downloads weights on demand. Full package uses the same UI and shows bundled weights as installed. User models survive application updates." />
+        </StackPanel>
+        <Border Style="{StaticResource CardStyle}">
+            <StackPanel Spacing="12">
+                <TextBlock x:Name="ModelSourcesTitle" Style="{StaticResource SectionTitleStyle}" Text="Download Source" />
+                <Grid ColumnSpacing="12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="220" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <ComboBox x:Name="ModelSourceBox" Header="Source" SelectedIndex="0"
+                              SelectionChanged="ModelSourceBox_SelectionChanged">
+                        <ComboBoxItem x:Name="OfficialModelSourceItem" Content="Official (GitHub / Hugging Face)" Tag="github" />
+                        <ComboBoxItem x:Name="MirrorModelSourceItem" Content="Mirror (GitHub Proxy / HF Mirror)" Tag="mirror" />
+                        <ComboBoxItem x:Name="CustomModelSourceItem" Content="Custom URL" Tag="custom" />
+                    </ComboBox>
+                    <TextBox x:Name="CustomSourceBox" Grid.Column="1" Header="Custom Base URL or {archive} Template"
+                             IsEnabled="False" PlaceholderText="https://example.com/models" />
+                    <Button x:Name="RefreshModelsButton" Grid.Column="2" Margin="0,26,0,0" Click="RefreshModels_Click" Content="Refresh Status" />
+                </Grid>
+                <TextBlock x:Name="ModelRootText" Style="{StaticResource CaptionStyle}" FontFamily="Consolas" />
+            </StackPanel>
+        </Border>
+        <InfoBar x:Name="ModelInfoBar" IsOpen="False" IsClosable="True"
+                 Visibility="Collapsed" Closed="ModelInfoBar_Closed" />
+        <ProgressBar x:Name="ModelProgress" Minimum="0" Maximum="100" Value="0" />
+        <TextBlock x:Name="ModelStatusText" Style="{StaticResource CaptionStyle}" Text="Reading model status..." />
+        <ListView x:Name="ModelPacksList" SelectionMode="None">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <Grid Padding="8" ColumnSpacing="12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Spacing="4">
+                            <TextBlock FontSize="17" FontWeight="SemiBold" Text="{Binding DisplayName}" />
+                            <TextBlock Style="{StaticResource CaptionStyle}" Text="{Binding Description}" />
+                            <TextBlock FontFamily="Consolas" Text="{Binding StatusText}" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8"
+                                    VerticalAlignment="Center">
+                            <Button Content="{Binding ImportText}" Tag="{Binding Id}" Click="ImportModel_Click" />
+                            <Button Content="{Binding RemoveText}" Tag="{Binding Id}" Click="RemoveModel_Click"
+                                    IsEnabled="{Binding CanRemove}" />
+                            <Button Content="{Binding RepairText}" Tag="{Binding Id}" Click="RepairModel_Click"
+                                    IsEnabled="{Binding CanRepair}"
+                                    ToolTipService.ToolTip="Verify the installed files against their pinned SHA-256 and re-download only the damaged ones." />
+                            <Button Style="{StaticResource AccentButtonStyle}" Content="{Binding DownloadText}"
+                                    Tag="{Binding Id}" Click="DownloadModel_Click"
+                                    IsEnabled="{Binding CanDownload}" />
+                        </StackPanel>
+                    </Grid>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+                </StackPanel>
+            </ScrollViewer>
+
+            <ScrollViewer x:Name="SettingsView" Visibility="Collapsed" HorizontalScrollBarVisibility="Disabled"
+                          HorizontalContentAlignment="Stretch">
+                <StackPanel MaxWidth="1000" HorizontalAlignment="Center" Spacing="16">
+                    <StackPanel Spacing="4">
+                        <TextBlock FontSize="30" FontWeight="SemiBold" Text="Settings" />
+                        <TextBlock Style="{StaticResource CaptionStyle}"
+                                   Text="Configure the processing backend, environment scanning, and other advanced settings." />
+                    </StackPanel>
+                    <Border Style="{StaticResource CardStyle}">
+                        <StackPanel Spacing="12">
+                            <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Processing Backend" />
+                            <TextBlock Style="{StaticResource CaptionStyle}"
+                                       Text="Quick detection does not import PyTorch; full scan runs only when manually triggered and caches for 24 hours." />
+                            <TextBlock x:Name="BackendPathText" TextWrapping="Wrap" FontFamily="Consolas" />
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Button Click="RefreshCapabilities_Click" Content="Refresh Quick Detection" />
+                                <Button x:Name="ScanEnvironmentsButton" Style="{StaticResource AccentButtonStyle}"
+                                        Click="ScanEnvironments_Click" Content="Scan Python / PyTorch Environments" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                    <Border Style="{StaticResource CardStyle}">
+                        <StackPanel Spacing="10">
+                            <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Hardware &amp; Capabilities" />
+                            <TextBox x:Name="CapabilitiesBox" MinHeight="180" IsReadOnly="True" AcceptsReturn="True"
+                                     TextWrapping="Wrap" FontFamily="Consolas" />
+                        </StackPanel>
+                    </Border>
+                    <Border Style="{StaticResource CardStyle}">
+                        <StackPanel Spacing="10">
+                            <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Python Environments" />
+                            <TextBlock Style="{StaticResource CaptionStyle}"
+                                       Text="Results sorted by CUDA + NVIDIA VFX, CUDA, PyTorch availability. Use a suitable python.exe on the Process page." />
+                            <TextBox x:Name="EnvironmentResultsBox" MinHeight="240" IsReadOnly="True" AcceptsReturn="True"
+                                     TextWrapping="NoWrap" FontFamily="Consolas"
+                                     ScrollViewer.HorizontalScrollBarVisibility="Auto" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+
+            <ScrollViewer x:Name="AboutView" Visibility="Collapsed" HorizontalContentAlignment="Stretch">
+                <StackPanel MaxWidth="760" HorizontalAlignment="Center" Spacing="16">
+                    <TextBlock FontSize="30" FontWeight="SemiBold" Text="About" />
+                    <Border Style="{StaticResource CardStyle}">
+                        <StackPanel Spacing="12">
+                            <TextBlock FontSize="24" FontWeight="SemiBold" Text="Light Video Enhancer-Forked" />
+                            <TextBlock Style="{StaticResource CaptionStyle}"
+                                       Text="WinUI 3 frontend targets Windows 10 1809 and above; Windows 7 continues to use the original Tk frontend. Both interfaces share the same Python, C/C++, NCNN, CUDA, and FFmpeg processing core." />
+                            <TextBlock x:Name="VersionText" Text="WinUI 3: 0.0.1&#10;Backend: 0.0.1" />
+                            <HyperlinkButton NavigateUri="https://github.com/fozter/Light-Video-Enhancer-Forked"
+                                             Content="Open GitHub Repository" />
+                            <ComboBox x:Name="ThemeBox" Header="Theme" SelectedIndex="0"
+                                      SelectionChanged="ThemeBox_SelectionChanged" Width="220" HorizontalAlignment="Left">
+                                <ComboBoxItem Content="System" Tag="system" />
+                                <ComboBoxItem Content="Light" Tag="light" />
+                                <ComboBoxItem Content="Dark" Tag="dark" />
+                            </ComboBox>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+    </NavigationView>
+</Page>

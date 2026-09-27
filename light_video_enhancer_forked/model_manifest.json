@@ -1,0 +1,158 @@
+{
+  "packs": {
+    "ema-vfi-small": {
+      "archive": "lve-model-ema-vfi-small.zip",
+      "archive_size": 53867541,
+      "files": {
+        "fi/ema_vfi/ours_small_t.pkl": "ad845671f7250d408937718aca19eaf87aa1ca79215070f7641eea332b703233"
+      },
+      "installed_size": 58535773,
+      "sha256": "1d6cc0ecf4424ffcafe857bbb8b0d8a63cdb05f84321c65d98fa6cd88a745f47"
+    },
+    "esrgan-classic": {
+      "archive": "lve-model-esrgan-classic.zip",
+      "archive_size": 30936141,
+      "files": {
+        "ncnn/realesrgan/models/esrgan-x4.bin": "38c998af20c5890ae1e20b71555dd0c94f343e2fee13542e5201a845a46a9c84",
+        "ncnn/realesrgan/models/esrgan-x4.param": "35330ececcea33b6c397a72548e788d5d53becee4734c50b7fada36e89f10a86"
+      },
+      "installed_size": 33540549,
+      "sha256": "22fa05142e53575a27a118640cce2cc718b53b570f445cc676a83862918311d7"
+    },
+    "flashvsr-v1.1": {
+      "archive": "flashvsr-v1.1",
+      "archive_size": 6925634764,
+      "files": {
+        "flashvsr-v1.1/LQ_proj_in.ckpt": "d6d011cdaaba6a52645086caa08fa04124e746f6ca568140a24007591142bfd2",
+        "flashvsr-v1.1/TCDecoder.ckpt": "e224bdcf2f52745cbf4d393ff5374c2ba09e90285d5d19062d2bf63b915b6161",
+        "flashvsr-v1.1/diffusion_pytorch_model_streaming_dmd.safetensors": "bd28180edcf3446c028e32fc6b731a80bf7e4da2ab4caac3186b9499964d37be"
+      },
+      "installed_size": 0,
+      "sha256": ""
+    },
+    "ifrnet-ncnn": {
+      "archive": "lve-model-ifrnet-ncnn.zip",
+      "archive_size": 53858034,
+      "files": {
+        "ncnn/ifrnet/IFRNet_L_Vimeo90K/ifrnet.bin": "fa6e504d4a9376e492aa9a68015d70dcb52e087759132c9432fb3acdd14e9184",
+        "ncnn/ifrnet/IFRNet_L_Vimeo90K/ifrnet.param": "bce51b88a14b24fa73fccd46dad3cde5d26aea48bfcfa1f7d2d4130b0259e24c",
+        "ncnn/ifrnet/IFRNet_S_Vimeo90K/ifrnet.bin": "7c3fe0a5eb7e544bc8c615ee47d4bafcbc077f98d75eda217c9657979adb1e14",
+        "ncnn/ifrnet/IFRNet_S_Vimeo90K/ifrnet.param": "45ad4ea3bd30e6a97fababd162fdc96382c26dbb05ff2ce324e71ed19a9192a1",
+        "ncnn/ifrnet/IFRNet_Vimeo90K/ifrnet.bin": "1f01421cbc3918f240ac7212e40f2d3423f61618a3a6434d1f25a32007abe9cf",
+        "ncnn/ifrnet/IFRNet_Vimeo90K/ifrnet.param": "86334ec3a5aa85e4457a364f3169e962267c2d5dada2feb6484973d91b762c03"
+      },
+      "installed_size": 58022123,
+      "sha256": "d09d8d264613361385c0300b686f9cf42d8bb70c34311927428dc6b5a1ebaf6e"
+    },
+    "realcugan": {
+      "archive": "lve-model-realcugan.zip",
+      "archive_size": 26981119,
+      "files": {
+        "ncnn/realcugan/models-se/up2x-conservative.bin": "91c72c136e7ff8556323d4449c5ceeff22d9829bf8463a01137cadb8d59b84a0",
+        "ncnn/realcugan/models-se/up2x-conservative.param": "91efac7489bf249f092faa3764e3a3d1d31ef290051e39f2afd2138c98ccce30",
+        "ncnn/realcugan/models-se/up2x-denoise1x.bin": "09373c4fddfd2a57fb4af5e516eba1b4c9caa132fd52ffd01bcaefee543bf7f6",
+        "ncnn/realcugan/models-se/up2x-denoise1x.param": "91efac7489bf249f092faa3764e3a3d1d31ef290051e39f2afd2138c98ccce30",
+        "ncnn/realcugan/models-se/up2x-denoise2x.bin": "47427a52badebfbd7bb6db97196a2844c553f7f2bb93c9527b26347bea0430e7",
+        "ncnn/realcugan/models-se/up2x-denoise2x.param": "91efac7489bf249f092faa3764e3a3d1d31ef290051e39f2afd2138c98ccce30",
+        "ncnn/realcugan/models-se/up2x-denoise3x.bin": "610ebae63f388fe6f39615cc5f4eaeb038d5aa6ba8b299ba3b989f7f7a1a280a",
+        "ncnn/realcugan/models-se/up2x-denoise3x.param": "91efac7489bf249f092faa3764e3a3d1d31ef290051e39f2afd2138c98ccce30",
+        "ncnn/realcugan/models-se/up2x-no-denoise.bin": "7f135a712830b16678cb8247b9517308c5f3858fca9b10e1c3ad5ef6e261de0c",
+        "ncnn/realcugan/models-se/up2x-no-denoise.param": "91efac7489bf249f092faa3764e3a3d1d31ef290051e39f2afd2138c98ccce30",
+        "ncnn/realcugan/models-se/up3x-conservative.bin": "8321c450efedcd94192196b03ddec19c2a023a5637df7208d49e9e0461560dff",
+        "ncnn/realcugan/models-se/up3x-conservative.param": "9e71ba0bce194f6a95422140c8caa25accbbfd9ec84a0cc08f7f4ec1e615a5a8",
+        "ncnn/realcugan/models-se/up3x-denoise3x.bin": "fdb269034f7d6bf59be8fe1c03c43a75671af464e045a13870b24b649d64f1f6",
+        "ncnn/realcugan/models-se/up3x-denoise3x.param": "9e71ba0bce194f6a95422140c8caa25accbbfd9ec84a0cc08f7f4ec1e615a5a8",
+        "ncnn/realcugan/models-se/up3x-no-denoise.bin": "e22e8e647b20eb0067cc46b9cf83bcb0893b2e77e83beaee0bedecf4c735f716",
+        "ncnn/realcugan/models-se/up3x-no-denoise.param": "9e71ba0bce194f6a95422140c8caa25accbbfd9ec84a0cc08f7f4ec1e615a5a8",
+        "ncnn/realcugan/models-se/up4x-conservative.bin": "1ffde324bf3444adade3e70ff4ff4eac7a4bfbf4c01b5aab4563a89e5cec16da",
+        "ncnn/realcugan/models-se/up4x-conservative.param": "63e8f6a5a57acb4b7678fd928612538ae7208c836223becdb66ffb82bd2aab9b",
+        "ncnn/realcugan/models-se/up4x-denoise3x.bin": "1fe05d6066901d354bbbc0cb53fba6588ef7637e1ec9c3bce7546900484d0b35",
+        "ncnn/realcugan/models-se/up4x-denoise3x.param": "63e8f6a5a57acb4b7678fd928612538ae7208c836223becdb66ffb82bd2aab9b",
+        "ncnn/realcugan/models-se/up4x-no-denoise.bin": "aa3d9bda3f46bb48f709d874ccaf67877e94a2fd6cedca7dac5ccb3bf714e066",
+        "ncnn/realcugan/models-se/up4x-no-denoise.param": "63e8f6a5a57acb4b7678fd928612538ae7208c836223becdb66ffb82bd2aab9b"
+      },
+      "installed_size": 29108374,
+      "sha256": "b0f214242ba90f6d3d69e73a1890685612db621d41eac2c4019ae91bd693b99b"
+    },
+    "realesrgan-anime": {
+      "archive": "lve-model-realesrgan-anime.zip",
+      "archive_size": 8294019,
+      "files": {
+        "ncnn/realesrgan/models/realesrgan-x4plus-anime.bin": "fe01c269cfd10cdef8e018ab66ebe750cf79c7af4d1f9c16c737e1295229bacc",
+        "ncnn/realesrgan/models/realesrgan-x4plus-anime.param": "2b8fb6e0ae4d2d85704ca08c119a2f5ea40add4f2ecd512eb7f4cd44b6127ed4"
+      },
+      "installed_size": 8973790,
+      "sha256": "921c31f812f7f1058955c694cba284ac14acadc0c6d9e97d95d9e4e6c7f8294a"
+    },
+    "realesrgan-fast": {
+      "archive": "lve-model-realesrgan-fast.zip",
+      "archive_size": 3505594,
+      "files": {
+        "ncnn/realesrgan/models/realesr-animevideov3-x2.bin": "548a36f9c3f4ab8da56cd3b13badf23968bee207b396dad14d04b830e5f2ab2d",
+        "ncnn/realesrgan/models/realesr-animevideov3-x2.param": "b88ff4f00ebf019a7fdac17fdd45a7fd3665d37509efc5baf2e4da2e24420a04",
+        "ncnn/realesrgan/models/realesr-animevideov3-x3.bin": "548a36f9c3f4ab8da56cd3b13badf23968bee207b396dad14d04b830e5f2ab2d",
+        "ncnn/realesrgan/models/realesr-animevideov3-x3.param": "d1a5755008791d09b57e3425fc9dd0bd26b00fdf79c606210bc0e693f8230881",
+        "ncnn/realesrgan/models/realesr-animevideov3-x4.bin": "548a36f9c3f4ab8da56cd3b13badf23968bee207b396dad14d04b830e5f2ab2d",
+        "ncnn/realesrgan/models/realesr-animevideov3-x4.param": "850a248e7c14c27e5bd8cf7265113a9441036a7db63963bb8aa5169d788a435e"
+      },
+      "installed_size": 3751527,
+      "sha256": "14ab3704570177656fa755a62e94d117c8e95c9441b8e0c01e6e19be86a75daf"
+    },
+    "realesrgan-general": {
+      "archive": "lve-model-realesrgan-general.zip",
+      "archive_size": 30992249,
+      "files": {
+        "ncnn/realesrgan/models/realesrgan-x4plus.bin": "713ee713b0353afaa27976f0563a64a5043bd70b9bd8936c2e26e25ebcdbcddf",
+        "ncnn/realesrgan/models/realesrgan-x4plus.param": "35330ececcea33b6c397a72548e788d5d53becee4734c50b7fada36e89f10a86"
+      },
+      "installed_size": 33540549,
+      "sha256": "d962108b8eb7970e77deadd051191c8a7630c662f86615982794df1132ea7090"
+    },
+    "rife-ncnn": {
+      "archive": "lve-model-rife-ncnn.zip",
+      "archive_size": 9886569,
+      "files": {
+        "ncnn/rife/rife-v4.6/flownet.bin": "f334ed2260149ce0188a6dcf049844e8b0cdd912e01cbcfb63553157d2508958",
+        "ncnn/rife/rife-v4.6/flownet.param": "28df14d57a225725ee5386f52eba422488450d37c9f40800ed4f62e8ba846692"
+      },
+      "installed_size": 10631069,
+      "sha256": "664fa6f22de4b45005532b0c21888ad1a10247a116df3945656c589912f7c761"
+    },
+    "rife-pytorch": {
+      "archive": "lve-model-rife-pytorch.zip",
+      "archive_size": 22903705,
+      "files": {
+        "fi/flownet.pkl": "6615790efd627772917205db291f51cd392528a157ecbb2ecaeec3bff8eb6de2"
+      },
+      "installed_size": 24636301,
+      "sha256": "83148008ba9e038ad77727c56aebb095ebe2d549cb38608690c6ef79a20784d1"
+    },
+    "seedvr2-3b-fp8": {
+      "archive": "seedvr2-3b-fp8",
+      "archive_size": 3892869510,
+      "files": {
+        "seedvr2-3b-fp8/ema_vae_fp16.safetensors": "20678548f420d98d26f11442d3528f8b8c94e57ee046ef93dbb7633da8612ca1",
+        "seedvr2-3b-fp8/seedvr2_ema_3b_fp8_e4m3fn.safetensors": "3bf1e43ebedd570e7e7a0b1b60d6a02e105978f505c8128a241cde99a8240cff"
+      },
+      "installed_size": 0,
+      "sha256": ""
+    },
+    "span-ncnn": {
+      "archive": "lve-model-span-ncnn.zip",
+      "archive_size": 6829667,
+      "files": {
+        "ncnn/span/spanx2_ch48.bin": "9a3b1c2485c1e93ad03124e20c2fa26843c4fb579384a46bd0d16cbf7f6b7fb3",
+        "ncnn/span/spanx2_ch48.param": "242d27ddb549a7f5f2996801d1383e114428b6e403afc6405c54b575cb31224f",
+        "ncnn/span/spanx2_ch52.bin": "906f1f518608a8d22a51e83c2436ce5d74f1ce13a40c3c8b1db91f176cd9c27a",
+        "ncnn/span/spanx2_ch52.param": "b66651d2ca3177c2da597c42a0e9e31952a8bafbc7681997c4919c726a0b8755",
+        "ncnn/span/spanx4_ch48.bin": "7546b7b66ab5ed53303cc03c615698d1446828adf9f8c150530750fcec81b1c2",
+        "ncnn/span/spanx4_ch48.param": "9e9d15c264e2bdeb5ebe4c8f4401a1efd9fd1e3e704010c3db9ac54965dc823a",
+        "ncnn/span/spanx4_ch52.bin": "5380d810aaac0b8c89a4fd55ab92eb95ae6b2606e3aefb0382ac62c009981b55",
+        "ncnn/span/spanx4_ch52.param": "7ccc747533e5c7d23ae25c84ba0aa0bf5cf1b221d939e94f81049887661e1053"
+      },
+      "installed_size": 7289976,
+      "sha256": "1398a73017f3bf53aae7a7d35aa98c1d45bbafdc4f9930974e9eb76ad2faac0d"
+    }
+  },
+  "protocol_version": 1
+}

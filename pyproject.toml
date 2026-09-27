@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "light-video-enhancer-forked"
+version = "0.0.1"
+description = "Windows video super-resolution and frame interpolation pipeline"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {file = "LICENSE"}
+authors = [{name = "fozter"}]
+dependencies = [
+  "numpy>=1.24,<3",
+  "opencv-contrib-python>=4.8,<5",
+]
+
+[project.optional-dependencies]
+torch = ["torch>=2.0"]
+build = [
+  "pyinstaller==5.13.2; python_version == '3.8'",
+  "pyinstaller>=6,<7; python_version >= '3.10'",
+]
+
+[project.scripts]
+lve = "light_video_enhancer_forked.__main__:main"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+include = ["light_video_enhancer_forked*"]
+namespaces = false
+
+[tool.setuptools.package-data]
+light_video_enhancer_forked = [
+  "bridge/*.dll",
+  "ffmpeg_bridge/*.dll",
+  "ffmpeg_dlls/*.dll",
+  "fi/*.pkl",
+  "ncnn/**/*",
+]
