@@ -13,6 +13,12 @@ and in the code. See [THIRD_PARTY.md](THIRD_PARTY.md) for every bundled and
 downloadable component and its license, and
 [DISCLAIMER.md](DISCLAIMER.md) for the no-warranty terms.
 
+> **Provenance & copyright.** The original Light Video Enhancer code by
+> **ZyptusOn** was generated with DeepSeek V4Pro + TRAE Work; this fork's
+> code was generated with **GLM 5.3 + Muse Spark 1.3**. Copyright © 2026
+> ZyptusOn (original project) and © 2026 fozter (fork) — see
+> [LICENSE](LICENSE) for the MIT license text.
+
 ## Highlights
 
 - **WinUI 3 desktop app + a fully standalone CLI backend.** The
