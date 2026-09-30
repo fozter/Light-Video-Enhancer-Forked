@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+## v0.0.5 — Light Video Enhancer-Forked (2026-09-30)
+
+- **The Frame Rate selector now waits for the input's frame rate.** The
+  dropdown stays disabled until an input has been picked and its rate
+  has been read (a tooltip explains why), so a target above the 8x
+  interpolation cap cannot be selected ahead of the data. If an
+  already-selected target becomes invalid — the probe lands late or an
+  engine is selected afterwards — the selection snaps to the closest
+  legal lower rate (or the 2x multiplier). The input probe retries once
+  when the backend is busy with the startup capability query, and a
+  permanently failed probe falls back to the fully enabled list with
+  Start-time validation as the final guard.
+
 ## v0.0.4 — Light Video Enhancer-Forked (2026-09-30)
 
 - **Frame-rate choices that exceed the 8x interpolation cap are now

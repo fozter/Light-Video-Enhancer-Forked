@@ -100,6 +100,7 @@ public sealed partial class MainPage : Page
     // Start-time validation still rejects impossible targets.
     private double _sourceFps;
     private string _probedInputPath = string.Empty;
+    private bool _probePending;
 
     public MainPage()
     {
@@ -134,6 +135,7 @@ public sealed partial class MainPage : Page
             return;
         }
         _loaded = true;
+        UpdateRateChoiceAvailability();
         UpdateExternalEngineAvailability();
         RenderBackendPath();
         await RefreshCapabilitiesAsync();
@@ -443,53 +445,88 @@ public sealed partial class MainPage : Page
         if (File.Exists(path) && path != _probedInputPath)
         {
             _probedInputPath = path;
+            _probePending = true;
+            // Disable the rate selector while the frame rate is being
+            // read so an impossible target cannot be picked ahead of the
+            // data.
+            UpdateRateChoiceAvailability();
             double probed = 0.0;
-            try
+            for (int attempt = 0; attempt < 2 && probed <= 0.0; attempt++)
             {
-                // Best-effort: if another backend query is running, or the
-                // probe fails, every rate stays selectable and the
-                // Start-time validation still rejects impossible targets.
-                BackendCommandResult result = await _backend.QueryAsync(
-                    "--probe-json", path);
-                if (result.ExitCode == 0)
+                try
                 {
-                    using JsonDocument document = JsonDocument.Parse(result.StandardOutput);
-                    if (document.RootElement.TryGetProperty("ok", out JsonElement ok) &&
-                        ok.ValueKind == JsonValueKind.True &&
-                        document.RootElement.TryGetProperty("fps", out JsonElement rate) &&
-                        rate.TryGetDouble(out double value))
+                    // Best-effort: if another backend query is running
+                    // (typically the startup capability check), or the
+                    // probe fails, every rate stays selectable and the
+                    // Start-time validation still rejects impossible
+                    // targets.  One retry covers the startup contention.
+                    BackendCommandResult result = await _backend.QueryAsync(
+                        "--probe-json", path);
+                    if (result.ExitCode == 0)
                     {
-                        probed = value;
+                        using JsonDocument document = JsonDocument.Parse(result.StandardOutput);
+                        if (document.RootElement.TryGetProperty("ok", out JsonElement ok) &&
+                            ok.ValueKind == JsonValueKind.True &&
+                            document.RootElement.TryGetProperty("fps", out JsonElement rate) &&
+                            rate.TryGetDouble(out double value))
+                        {
+                            probed = value;
+                        }
                     }
                 }
+                catch
+                {
+                    probed = 0.0;
+                }
+                if (probed <= 0.0)
+                {
+                    await Task.Delay(3000);
+                }
             }
-            catch
-            {
-                probed = 0.0;
-            }
-            // A different input may have been picked while probing.
+            // A different input may have been picked while probing; a
+            // newer probe then owns the pending flag, so leave it alone.
             if (path != InputPathBox.Text.Trim())
             {
                 return;
             }
             _sourceFps = probed;
+            _probePending = false;
         }
         else if (!File.Exists(path) && path != _probedInputPath)
         {
             _sourceFps = 0.0;
+            _probePending = false;
         }
         UpdateRateChoiceAvailability();
     }
 
     private void UpdateRateChoiceAvailability()
     {
-        if (FiRateBox is null || FiEngineBox is null)
+        if (FiRateBox is null || FiEngineBox is null || InputPathBox is null)
         {
             return;
         }
+        // The rate selector unlocks once the input's frame rate is known,
+        // so a target above the 8x grid cannot be selected ahead of the
+        // data.  When the probe permanently fails the list falls back to
+        // fully enabled and Start-time validation remains the guard.
+        bool hasInput = File.Exists(InputPathBox.Text.Trim());
+        bool rateKnown = hasInput && !_probePending;
+        bool probeFailed = rateKnown && _sourceFps <= 0.0;
+        FiRateBox.IsEnabled = rateKnown;
+        ToolTipService.SetToolTip(FiRateBox,
+            !hasInput
+                ? "Pick an input video first; its frame rate decides the legal targets."
+                : _probePending
+                    ? "Reading the input frame rate..."
+                    : probeFailed
+                        ? "The input frame rate is unknown; every target stays selectable and Start re-checks it."
+                        : null);
         // With no engine the backend never interpolates: it only duplicates
         // or drops frames, so every target rate is legal.
         bool capped = SelectedTag(FiEngineBox, "none") != "none" && _sourceFps > 0.0;
+        string? selectedTag = (FiRateBox.SelectedItem as ComboBoxItem)?.Tag?.ToString();
+        double disabledRate = 0.0;
         foreach (object? entry in FiRateBox.Items)
         {
             if (entry is not ComboBoxItem item ||
@@ -511,6 +548,55 @@ public sealed partial class MainPage : Page
                     "{0:0.###} fps needs a {1:0.0}x interpolation grid from the {2:0.###} fps source; the maximum is 8x. Pick a lower rate or a source multiplier.",
                     rate, ratio, _sourceFps)
                 : null);
+            if (needsTooMuch && tag == selectedTag)
+            {
+                disabledRate = rate;
+            }
+        }
+        if (disabledRate > 0.0)
+        {
+            SnapRateSelection(disabledRate);
+        }
+    }
+
+    private void SnapRateSelection(double fromRate)
+    {
+        // The target became impossible after it was already selected (the
+        // probe landed late, or an engine was selected afterwards): move to
+        // the closest legal lower rate, or the 2x multiplier when none
+        // applies.  Start would otherwise carry the rejected target.
+        ComboBoxItem? best = null;
+        double bestRate = 0.0;
+        foreach (object? entry in FiRateBox.Items)
+        {
+            if (entry is not ComboBoxItem { IsEnabled: true } item ||
+                item.Tag?.ToString() is not string tag ||
+                tag.StartsWith("mult:", StringComparison.Ordinal))
+            {
+                continue;
+            }
+            double rate = ParseRateChoice(tag);
+            if (rate > 0.0 && rate < fromRate && rate > bestRate)
+            {
+                best = item;
+                bestRate = rate;
+            }
+        }
+        if (best is null)
+        {
+            foreach (object? entry in FiRateBox.Items)
+            {
+                if (entry is ComboBoxItem candidate &&
+                    candidate.Tag?.ToString() == "mult:2")
+                {
+                    best = candidate;
+                    break;
+                }
+            }
+        }
+        if (best is not null)
+        {
+            FiRateBox.SelectedItem = best;
         }
     }
 
