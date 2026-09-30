@@ -230,7 +230,6 @@
                                         <ComboBoxItem Content="120" Tag="120" />
                                         <ComboBoxItem Content="144" Tag="144" />
                                         <ComboBoxItem Content="240" Tag="240" />
-                                        <ComboBoxItem Content="480" Tag="480" />
                                     </ComboBox>
                                     <ComboBox x:Name="FiQualityBox" Grid.Column="1" Header="Quality" SelectedIndex="2"
                                               ToolTipService.ToolTip="Optical flow engines support quality tiers; RIFE models use their own fixed parameters.">

@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+## v0.0.4 — Light Video Enhancer-Forked (2026-09-30)
+
+- **Frame-rate choices that exceed the 8x interpolation cap are now
+  disabled in the GUI.** The backend rejects targets that need more than
+  an 8x interpolation grid (for example 480 fps from a 23.976 fps
+  source); the Frame Rate dropdown now greys them out as soon as an input
+  is picked: the new `--probe-json INPUT` protocol query reports the
+  source rate, exact rates needing a larger grid are disabled with an
+  explanatory tooltip, and the 480 fps entry was removed from the list.
+  With "No Interpolation" selected every rate stays available (the
+  backend only duplicates or drops frames); `--fps` itself is unchanged
+  and the Start-time validation remains the final guard.
+
 ## v0.0.3 — Light Video Enhancer-Forked (2026-09-30)
 
 - **RIFE AI (PyTorch) gained the ncnn engine's model menu.** One engine,

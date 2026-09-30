@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Text;
 using System.Text.Json;
 using LightVideoEnhancerForked_WinUI.Services;
@@ -90,6 +91,15 @@ public sealed partial class MainPage : Page
     private int _fiQualityTierIndex = 2;
     private string _rifeNcnnModelSelection = DefaultRifeNcnnModel;
     private string _rifeTorchModelSelection = DefaultRifeTorchModel;
+
+    // The backend pipeline caps fps-derived interpolation grids at this
+    // multiple of the source rate (pipeline.derived_frame_rate_multiplier).
+    private const double MaxRateMultiplier = 8.0;
+    // Frame rate of the selected input, from the backend's --probe-json
+    // query.  0 means unknown: every exact rate stays selectable and the
+    // Start-time validation still rejects impossible targets.
+    private double _sourceFps;
+    private string _probedInputPath = string.Empty;
 
     public MainPage()
     {
@@ -253,6 +263,7 @@ public sealed partial class MainPage : Page
     private void InputPathBox_TextChanged(object sender, TextChangedEventArgs e)
     {
         SuggestOutputPath();
+        ProbeInputFrameRate();
     }
 
     private void QualitySelection_Changed(object sender, SelectionChangedEventArgs e)
@@ -302,6 +313,7 @@ public sealed partial class MainPage : Page
             ShowQualityTierChoices();
             FiQualityBox.IsEnabled = fi is "ema_vfi" or "vfimamba" or "dis" or "optical_flow" or "torch_flow";
         }
+        UpdateRateChoiceAvailability();
         SuggestOutputPath();
     }
 
@@ -419,6 +431,103 @@ public sealed partial class MainPage : Page
                 return;
             }
         }
+    }
+
+    private async void ProbeInputFrameRate()
+    {
+        if (InputPathBox is null)
+        {
+            return;
+        }
+        string path = InputPathBox.Text.Trim();
+        if (File.Exists(path) && path != _probedInputPath)
+        {
+            _probedInputPath = path;
+            double probed = 0.0;
+            try
+            {
+                // Best-effort: if another backend query is running, or the
+                // probe fails, every rate stays selectable and the
+                // Start-time validation still rejects impossible targets.
+                BackendCommandResult result = await _backend.QueryAsync(
+                    "--probe-json", path);
+                if (result.ExitCode == 0)
+                {
+                    using JsonDocument document = JsonDocument.Parse(result.StandardOutput);
+                    if (document.RootElement.TryGetProperty("ok", out JsonElement ok) &&
+                        ok.ValueKind == JsonValueKind.True &&
+                        document.RootElement.TryGetProperty("fps", out JsonElement rate) &&
+                        rate.TryGetDouble(out double value))
+                    {
+                        probed = value;
+                    }
+                }
+            }
+            catch
+            {
+                probed = 0.0;
+            }
+            // A different input may have been picked while probing.
+            if (path != InputPathBox.Text.Trim())
+            {
+                return;
+            }
+            _sourceFps = probed;
+        }
+        else if (!File.Exists(path) && path != _probedInputPath)
+        {
+            _sourceFps = 0.0;
+        }
+        UpdateRateChoiceAvailability();
+    }
+
+    private void UpdateRateChoiceAvailability()
+    {
+        if (FiRateBox is null || FiEngineBox is null)
+        {
+            return;
+        }
+        // With no engine the backend never interpolates: it only duplicates
+        // or drops frames, so every target rate is legal.
+        bool capped = SelectedTag(FiEngineBox, "none") != "none" && _sourceFps > 0.0;
+        foreach (object? entry in FiRateBox.Items)
+        {
+            if (entry is not ComboBoxItem item ||
+                item.Tag?.ToString() is not string tag ||
+                tag.StartsWith("mult:", StringComparison.Ordinal))
+            {
+                continue;
+            }
+            double rate = ParseRateChoice(tag);
+            if (rate <= 0.0)
+            {
+                continue;
+            }
+            double ratio = rate / _sourceFps;
+            bool needsTooMuch = capped && Math.Ceiling(ratio - 1e-9) > MaxRateMultiplier;
+            item.IsEnabled = !needsTooMuch;
+            ToolTipService.SetToolTip(item, needsTooMuch
+                ? string.Format(CultureInfo.InvariantCulture,
+                    "{0:0.###} fps needs a {1:0.0}x interpolation grid from the {2:0.###} fps source; the maximum is 8x. Pick a lower rate or a source multiplier.",
+                    rate, ratio, _sourceFps)
+                : null);
+        }
+    }
+
+    private static double ParseRateChoice(string tag)
+    {
+        int slash = tag.IndexOf('/');
+        if (slash > 0 &&
+            double.TryParse(tag[..slash], NumberStyles.Float,
+                CultureInfo.InvariantCulture, out double numerator) &&
+            double.TryParse(tag[(slash + 1)..], NumberStyles.Float,
+                CultureInfo.InvariantCulture, out double denominator) &&
+            denominator > 0.0)
+        {
+            return numerator / denominator;
+        }
+        return double.TryParse(tag, NumberStyles.Float,
+            CultureInfo.InvariantCulture, out double value) ? value : 0.0;
     }
 
     private void CodecBox_SelectionChanged(object sender, SelectionChangedEventArgs e)

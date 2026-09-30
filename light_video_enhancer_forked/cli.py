@@ -147,7 +147,8 @@ def build_parser() -> argparse.ArgumentParser:
                         help="target output frame rate; accepts numbers or exact "
                              "ratios like 24000/1001 (an interpolation engine runs on "
                              "the smallest grid that covers it, then frames are "
-                             "added/dropped to preserve duration)")
+                             "added/dropped to preserve duration; the grid is "
+                             "capped at 8x the source rate)")
     parser.add_argument("--start", type=float, help="start time in seconds")
     parser.add_argument("--duration", type=float, help="duration to process in seconds")
     parser.add_argument("--device", default="auto", choices=["auto", "cuda", "cpu"],

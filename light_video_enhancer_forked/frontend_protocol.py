@@ -28,6 +28,35 @@ def capabilities_payload() -> dict:
     return payload
 
 
+def probe_video_payload(input_path: str) -> dict:
+    """Report the source video basics without processing it.
+
+    The GUI uses the frame rate to disable frame-rate targets that would
+    need an interpolation grid above the pipeline's 8x maximum
+    (pipeline.derived_frame_rate_multiplier) before Start is pressed.
+    """
+    import os
+
+    payload = {"protocol_version": PROTOCOL_VERSION}
+    if not os.path.isfile(input_path):
+        payload["ok"] = False
+        payload["error"] = "The input file does not exist: %s" % input_path
+        return payload
+    try:
+        from .ffmpeg_bridge import FFmpegVideoDecoder
+        info = FFmpegVideoDecoder(input_path, use_nvdec=False).probe()
+    except Exception as exc:  # the GUI falls back to Start-time validation
+        payload["ok"] = False
+        payload["error"] = str(exc)
+        return payload
+    payload["ok"] = True
+    payload["width"] = int(info["width"])
+    payload["height"] = int(info["height"])
+    payload["fps"] = float(info["fps"])
+    payload["frames"] = int(info["total_frames"])
+    return payload
+
+
 def _model_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(add_help=False)
     action = parser.add_mutually_exclusive_group(required=True)
@@ -54,6 +83,9 @@ def handle_frontend_command(argv: List[str],
     if argv == ["--models-json"]:
         from .model_manager import list_model_packs
         _print(list_model_packs())
+        return True
+    if argv and argv[0] == "--probe-json" and len(argv) == 2:
+        _print(probe_video_payload(argv[1]))
         return True
     if not any(flag in argv for flag in (
             "--download-model", "--install-model-pack", "--remove-model",

@@ -153,6 +153,10 @@ duration:
 - Exact ratios are accepted, so NTSC rates stay exact: `--fps 24000/1001`
   (23.976), `--fps 30000/1001` (29.97), `--fps 48000/1001` (47.952),
   `--fps 60000/1001` (59.94).
+- With an interpolation engine selected, the derived grid is capped at
+  8x the source rate: a target above that is rejected (for example
+  480 fps from a 23.976 fps source). The WinUI Frame Rate selector
+  disables such targets ahead of time.
 - A target at or below the source rate disables interpolation and only
   resamples (frames are dropped).
 - An explicit `--fi-multiplier` overrides the derived grid and keeps the
