@@ -22,7 +22,7 @@
     <SatelliteResourceLanguages>en-US;zh-CN</SatelliteResourceLanguages>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <Version>0.0.1</Version>
+    <Version>0.0.2</Version>
     <Product>Light Video Enhancer-Forked</Product>
     <Company>fozter</Company>
   </PropertyGroup>

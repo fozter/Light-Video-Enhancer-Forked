@@ -14,7 +14,7 @@ from ._shared_frames import (
     FramedPipeReader, SharedNDArray, close_process_pipes, write_framed)
 from .executor import FrameBatchExecutor
 from .fi._scene_detect import classify_pair
-from .fi.rife import _find_weight_file
+from .fi.rife import RIFE_TORCH_MODELS
 from .sr.nvvfx_sr import _GUI_QUALITY_LEVELS, _NVVFX_QUALITY_LEVELS
 
 _log = get_logger(__name__)
@@ -104,10 +104,14 @@ class FusedRifeNvvfxEngine(FrameBatchExecutor):
         alignment = max(128, int(128 / scale))
         pad_w = ((src_width + alignment - 1) // alignment) * alignment - src_width
         pad_h = ((src_height + alignment - 1) // alignment) * alignment - src_height
-        model_path = _find_weight_file()
-        if not model_path:
+        # The fused worker runs the bundled v4.27 (FluidFrames)
+        # architecture (RIFE427); the only torch RIFE model shipped with
+        # the app.  Other RIFE PyTorch models run through the regular
+        # engines.
+        model_path = RIFE_TORCH_MODELS["4.27_fluidframes"].weight_path()
+        if not os.path.isfile(model_path):
             self.release()
-            raise FileNotFoundError("RIFE weights are missing: light_video_enhancer_forked/fi/flownet.pkl")
+            raise FileNotFoundError("RIFE weights are missing: light_video_enhancer_forked/fi/rife_v4.27_fluidframes.pth")
 
         python_executable = self._torch_python or sys.executable
         script = get_pkg_file("_fused_rife_nvvfx_infer.py")

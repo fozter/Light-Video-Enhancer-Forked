@@ -45,17 +45,18 @@ def _data_files(profile, target):
         "_shared_frames.py",
         "model_manifest.json",
         "_fused_rife_nvvfx_infer.py",
-        # The FFmpeg runtime DLLs (BtbN FFmpeg 8.1 GPL shared build with the
-        # FFV1 encoder) are collected automatically by PyInstaller's binary
-        # dependency analysis because ffmpeg_dlls is on PATH during the build;
-        # they end up at the bundle root, which worker.py adds as a DLL
-        # search directory in frozen mode.
+        # The FFmpeg runtime DLLs (our minimal FFmpeg 9.0.2 MSYS2 build with
+        # the full codec menu incl. the FFV1 encoder; see build_ffmpeg.sh) are
+        # collected automatically by PyInstaller's binary dependency analysis
+        # because ffmpeg_dlls is on PATH during the build; they end up at the
+        # bundle root, which worker.py adds as a DLL search directory in frozen
+        # mode.
         os.path.join("ffmpeg_bridge", "ffmpeg_worker.dll"),
         os.path.join("bridge", "dxva_vsr_bridge.dll"),
         os.path.join("fi", "_rife_infer.py"),
         os.path.join("fi", "_rife_model.py"),
         os.path.join("fi", "warplayer.py"),
-        os.path.join("fi", "flownet.pkl"),
+        os.path.join("fi", "rife_v4.27_fluidframes.pth"),
         os.path.join("fi", "_ema_vfi_infer.py"),
         os.path.join("fi", "_ema_vfi_vendor"),
         os.path.join("fi", "ema_vfi"),

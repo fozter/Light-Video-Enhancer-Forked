@@ -1,23 +1,54 @@
 {
   "packs": {
+    "dloral-core": {
+      "archive": "dloral-core",
+      "archive_size": 8739659355,
+      "files": {
+        "dloral-core/model.pkl": "89ca79785c99fac07f59ad6876d2d707fcce87a088c15930956cb393e517d0df",
+        "dloral-core/spynet_20210409-c6c1bd09.pth": "c6c1bd09b52d05ba17f3e701f549d6faf5e314aabce8ae462c1c171a8d6c4914",
+        "dloral-core/stable-diffusion-2-1-base/scheduler/scheduler_config.json": "11ac5627d7df0fa344b875c4b5722b1767a8a2aa1684c2cf8b4d614300127234",
+        "dloral-core/stable-diffusion-2-1-base/text_encoder/config.json": "7e33bfc475f6cf76e69b28b101993ca834d1f22ff4d35caefde32d63d4f42fba",
+        "dloral-core/stable-diffusion-2-1-base/text_encoder/model.safetensors": "cce6febb0b6d876ee5eb24af35e27e764eb4f9b1d0b7c026c8c3333d4cfc916c",
+        "dloral-core/stable-diffusion-2-1-base/tokenizer/merges.txt": "9fd691f7c8039210e0fced15865466c65820d09b63988b0174bfe25de299051a",
+        "dloral-core/stable-diffusion-2-1-base/tokenizer/special_tokens_map.json": "f118ab3a983206e4f32583448de6bd6aae4ee21869135cef1f5848a753cdaab6",
+        "dloral-core/stable-diffusion-2-1-base/tokenizer/tokenizer_config.json": "d562b18a0c6d32a168fce3d7a342fce64579ebacffb98fb71b0affc494fc32d8",
+        "dloral-core/stable-diffusion-2-1-base/tokenizer/vocab.json": "e089ad92ba36837a0d31433e555c8f45fe601ab5c221d4f607ded32d9f7a4349",
+        "dloral-core/stable-diffusion-2-1-base/unet/config.json": "ce0c6d379e3b1d3e1f79338de70c80a1e36f17a6372439a8249b6fb0dfa1b608",
+        "dloral-core/stable-diffusion-2-1-base/unet/diffusion_pytorch_model.safetensors": "6dfae3e5f7d459b50f4b0850ead945972c75bb0e1897628933e169eb43974214",
+        "dloral-core/stable-diffusion-2-1-base/vae/config.json": "424117cb534ce03497c41305ed868980123917b2b6abba4bbaa615e968772903",
+        "dloral-core/stable-diffusion-2-1-base/vae/diffusion_pytorch_model.safetensors": "a1d993488569e928462932c8c38a0760b874d166399b14414135bd9c42df5815"
+      },
+      "installed_size": 0,
+      "sha256": ""
+    },
+    "dloral-prompt": {
+      "archive": "dloral-prompt",
+      "archive_size": 5632829366,
+      "files": {
+        "dloral-prompt/DAPE.pth": "a7028be2edcbe9ab0bd1c4ab6f2a2a86f4b44d32261a4faa50ae10fdd9b2feba",
+        "dloral-prompt/ram_swin_large_14m.pth": "15c729c793af28b9d107c69f85836a1356d76ea830d4714699fb62e55fcc08ed"
+      },
+      "installed_size": 0,
+      "sha256": ""
+    },
     "ema-vfi-small": {
       "archive": "lve-model-ema-vfi-small.zip",
-      "archive_size": 53867541,
+      "archive_size": 54022581,
       "files": {
         "fi/ema_vfi/ours_small_t.pkl": "ad845671f7250d408937718aca19eaf87aa1ca79215070f7641eea332b703233"
       },
       "installed_size": 58535773,
-      "sha256": "1d6cc0ecf4424ffcafe857bbb8b0d8a63cdb05f84321c65d98fa6cd88a745f47"
+      "sha256": "f450b4a5f099ac3ee2513e610f1184bf1b4e86bb739562c5730a59efd555d503"
     },
     "esrgan-classic": {
       "archive": "lve-model-esrgan-classic.zip",
-      "archive_size": 30936141,
+      "archive_size": 31033833,
       "files": {
         "ncnn/realesrgan/models/esrgan-x4.bin": "38c998af20c5890ae1e20b71555dd0c94f343e2fee13542e5201a845a46a9c84",
-        "ncnn/realesrgan/models/esrgan-x4.param": "35330ececcea33b6c397a72548e788d5d53becee4734c50b7fada36e89f10a86"
+        "ncnn/realesrgan/models/esrgan-x4.param": "c8a066c12541a1ef01ba90fddd90688278bdc11536847699239be29225015bc8"
       },
-      "installed_size": 33540549,
-      "sha256": "22fa05142e53575a27a118640cce2cc718b53b570f445cc676a83862918311d7"
+      "installed_size": 33541550,
+      "sha256": "098e1577b5703060d046ff9e7bc0182703994185ef3c02afc0f220fd7fd5916c"
     },
     "flashvsr-v1.1": {
       "archive": "flashvsr-v1.1",
@@ -32,7 +63,7 @@
     },
     "ifrnet-ncnn": {
       "archive": "lve-model-ifrnet-ncnn.zip",
-      "archive_size": 53858034,
+      "archive_size": 54002116,
       "files": {
         "ncnn/ifrnet/IFRNet_L_Vimeo90K/ifrnet.bin": "fa6e504d4a9376e492aa9a68015d70dcb52e087759132c9432fb3acdd14e9184",
         "ncnn/ifrnet/IFRNet_L_Vimeo90K/ifrnet.param": "bce51b88a14b24fa73fccd46dad3cde5d26aea48bfcfa1f7d2d4130b0259e24c",
@@ -42,11 +73,27 @@
         "ncnn/ifrnet/IFRNet_Vimeo90K/ifrnet.param": "86334ec3a5aa85e4457a364f3169e962267c2d5dada2feb6484973d91b762c03"
       },
       "installed_size": 58022123,
-      "sha256": "d09d8d264613361385c0300b686f9cf42d8bb70c34311927428dc6b5a1ebaf6e"
+      "sha256": "87d8a4d6f80c231660ae34eb049f3de76e0aa4339fac110df6e1344268807166"
+    },
+    "osdenhancer-v1": {
+      "archive": "osdenhancer-v1",
+      "archive_size": 12846839231,
+      "files": {
+        "osdenhancer-v1/prompt_embeddings/empty.safetensors": "49738b5f634bc7c7ebad8e0ba01bf8c4eb5930b84c38d00f78dc0d5bc0a417cc",
+        "osdenhancer-v1/scheduler/scheduler_config.json": "8c821359b9f0d625d87d0c9f095343e2c790acdf89b622dd020a2241647090ae",
+        "osdenhancer-v1/transformer/config.json": "0eaff819b4b628a087b83427e528ce43b848aa0eb3e737b98f0689e272e241ba",
+        "osdenhancer-v1/transformer/diffusion_pytorch_model-00001-of-00002.safetensors": "4ffe768fb2a9a384f666662c3ff62d37a861e90c58154f93cd65a30c94bca7c6",
+        "osdenhancer-v1/transformer/diffusion_pytorch_model-00002-of-00002.safetensors": "9a8f8768f700fd51cc3fe15f8cc756478d1f1e63de51c7e3bbaed78f9b4dc82f",
+        "osdenhancer-v1/transformer/diffusion_pytorch_model.safetensors.index.json": "b6208590d63174931273a705a56a0f2ac4dae057ea1cef33d1f9e7442bee7ef3",
+        "osdenhancer-v1/vae/config.json": "1ccbe603fdd170cddc16b678e3cbf0e736de396edf00c4b66e32b3a18b060350",
+        "osdenhancer-v1/vae/diffusion_pytorch_model.safetensors": "329fe3b7c3c45bf09697de2903cadbc65b8b999f7b612d972484d1061b47aa69"
+      },
+      "installed_size": 0,
+      "sha256": ""
     },
     "realcugan": {
       "archive": "lve-model-realcugan.zip",
-      "archive_size": 26981119,
+      "archive_size": 27058479,
       "files": {
         "ncnn/realcugan/models-se/up2x-conservative.bin": "91c72c136e7ff8556323d4449c5ceeff22d9829bf8463a01137cadb8d59b84a0",
         "ncnn/realcugan/models-se/up2x-conservative.param": "91efac7489bf249f092faa3764e3a3d1d31ef290051e39f2afd2138c98ccce30",
@@ -72,60 +119,105 @@
         "ncnn/realcugan/models-se/up4x-no-denoise.param": "63e8f6a5a57acb4b7678fd928612538ae7208c836223becdb66ffb82bd2aab9b"
       },
       "installed_size": 29108374,
-      "sha256": "b0f214242ba90f6d3d69e73a1890685612db621d41eac2c4019ae91bd693b99b"
+      "sha256": "7fd20f9d46b53991ce6599c0914432814d40f8145178762c46170c7141f9da84"
     },
     "realesrgan-anime": {
       "archive": "lve-model-realesrgan-anime.zip",
-      "archive_size": 8294019,
+      "archive_size": 8318633,
       "files": {
         "ncnn/realesrgan/models/realesrgan-x4plus-anime.bin": "fe01c269cfd10cdef8e018ab66ebe750cf79c7af4d1f9c16c737e1295229bacc",
-        "ncnn/realesrgan/models/realesrgan-x4plus-anime.param": "2b8fb6e0ae4d2d85704ca08c119a2f5ea40add4f2ecd512eb7f4cd44b6127ed4"
+        "ncnn/realesrgan/models/realesrgan-x4plus-anime.param": "d63c7e93c58ec5d0048ca1f0a995f40b2af17c2816a2e0a3b7172046d98795ec"
       },
-      "installed_size": 8973790,
-      "sha256": "921c31f812f7f1058955c694cba284ac14acadc0c6d9e97d95d9e4e6c7f8294a"
+      "installed_size": 8974060,
+      "sha256": "ee5a23a3537edf88547d738230c3d9c3a842478bfa1969f07064ddbe64d15093"
     },
     "realesrgan-fast": {
       "archive": "lve-model-realesrgan-fast.zip",
-      "archive_size": 3505594,
+      "archive_size": 3513947,
       "files": {
         "ncnn/realesrgan/models/realesr-animevideov3-x2.bin": "548a36f9c3f4ab8da56cd3b13badf23968bee207b396dad14d04b830e5f2ab2d",
-        "ncnn/realesrgan/models/realesr-animevideov3-x2.param": "b88ff4f00ebf019a7fdac17fdd45a7fd3665d37509efc5baf2e4da2e24420a04",
+        "ncnn/realesrgan/models/realesr-animevideov3-x2.param": "1393f7c0e885f9d15a0668329a13f695ebd0ea45791f46d28145d7934824d224",
         "ncnn/realesrgan/models/realesr-animevideov3-x3.bin": "548a36f9c3f4ab8da56cd3b13badf23968bee207b396dad14d04b830e5f2ab2d",
-        "ncnn/realesrgan/models/realesr-animevideov3-x3.param": "d1a5755008791d09b57e3425fc9dd0bd26b00fdf79c606210bc0e693f8230881",
+        "ncnn/realesrgan/models/realesr-animevideov3-x3.param": "584a43e429188c159ef8e42191ef5a5fd1d2e3b17398e5cee6089726dec879c7",
         "ncnn/realesrgan/models/realesr-animevideov3-x4.bin": "548a36f9c3f4ab8da56cd3b13badf23968bee207b396dad14d04b830e5f2ab2d",
-        "ncnn/realesrgan/models/realesr-animevideov3-x4.param": "850a248e7c14c27e5bd8cf7265113a9441036a7db63963bb8aa5169d788a435e"
+        "ncnn/realesrgan/models/realesr-animevideov3-x4.param": "157c0a10405f885d4c53ce76fe2ba731694bcd16ec90ab6b889335e384239682"
       },
-      "installed_size": 3751527,
-      "sha256": "14ab3704570177656fa755a62e94d117c8e95c9441b8e0c01e6e19be86a75daf"
+      "installed_size": 3751655,
+      "sha256": "c4f3930dfa60756a648343817765f94c5bad705f3676b56bae9965283d47b9a2"
     },
     "realesrgan-general": {
       "archive": "lve-model-realesrgan-general.zip",
-      "archive_size": 30992249,
+      "archive_size": 31086652,
       "files": {
         "ncnn/realesrgan/models/realesrgan-x4plus.bin": "713ee713b0353afaa27976f0563a64a5043bd70b9bd8936c2e26e25ebcdbcddf",
-        "ncnn/realesrgan/models/realesrgan-x4plus.param": "35330ececcea33b6c397a72548e788d5d53becee4734c50b7fada36e89f10a86"
+        "ncnn/realesrgan/models/realesrgan-x4plus.param": "c8a066c12541a1ef01ba90fddd90688278bdc11536847699239be29225015bc8"
       },
-      "installed_size": 33540549,
-      "sha256": "d962108b8eb7970e77deadd051191c8a7630c662f86615982794df1132ea7090"
+      "installed_size": 33541550,
+      "sha256": "8a4253bbab7535b3efc7e2fec246d72881f61c9915fe436007992a455e27eaf5"
     },
     "rife-ncnn": {
       "archive": "lve-model-rife-ncnn.zip",
-      "archive_size": 9886569,
+      "archive_size": 10464337,
       "files": {
-        "ncnn/rife/rife-v4.6/flownet.bin": "f334ed2260149ce0188a6dcf049844e8b0cdd912e01cbcfb63553157d2508958",
-        "ncnn/rife/rife-v4.6/flownet.param": "28df14d57a225725ee5386f52eba422488450d37c9f40800ed4f62e8ba846692"
+        "ncnn/rife/rife-v4.27/flownet.bin": "0c1a4ef505eef41b4e99e9c5e9b789296ca9190556ef6fecb261317b2bdbf7c3",
+        "ncnn/rife/rife-v4.27/flownet.param": "68e38f1a81792b46f51c4b9b95354cbf3501bfe94c238e192dc545fac660e91b"
       },
-      "installed_size": 10631069,
-      "sha256": "664fa6f22de4b45005532b0c21888ad1a10247a116df3945656c589912f7c761"
+      "installed_size": 11358845,
+      "sha256": "60891cdbf7e5572258dbea00e7c7cdefe51e8a8021549ee1217671dc3f191e37"
+    },
+    "rife-ncnn-models": {
+      "archive": "lve-model-rife-ncnn-models.zip",
+      "archive_size": 196789291,
+      "files": {
+        "ncnn/rife/rife-v4.20/flownet.bin": "1e0c467588e87c90f20c63b1f54457456a5213dbcee0fb073966041fd42ce4f8",
+        "ncnn/rife/rife-v4.20/flownet.param": "d8d4c7875f80c24a4e76d88440708c3d81b49fcf34c62f2d1c07dc2f92dd9efe",
+        "ncnn/rife/rife-v4.21/flownet.bin": "6be3a813576b5699d3ccad6e9d877b48c3d3c9aefa8027eca38b374692ab6741",
+        "ncnn/rife/rife-v4.21/flownet.param": "e7dd2392d1317bc079cf579c650d52fae6a339abf45ded38125d2bc7836d19f7",
+        "ncnn/rife/rife-v4.22-lite/flownet.bin": "792da5d62937199886bf8bb781ab8e0eddf663854d57e4a43cd7b32e4e81b29b",
+        "ncnn/rife/rife-v4.22-lite/flownet.param": "091119e19a5891a5477de8f90b3c9e979baece5ee57c27d4e4138a6cc2552cc3",
+        "ncnn/rife/rife-v4.22/flownet.bin": "48f40d52b9306a86c09a541990384f28ac08c6607c3595ed43727ee4ef63e91c",
+        "ncnn/rife/rife-v4.22/flownet.param": "e7dd2392d1317bc079cf579c650d52fae6a339abf45ded38125d2bc7836d19f7",
+        "ncnn/rife/rife-v4.23/flownet.bin": "68452abcaa1841a86c6241a96ecf8c371d4458ecb4f6279b4026769a15eaa36f",
+        "ncnn/rife/rife-v4.23/flownet.param": "9f3f983543a665a0b72bc0bdb725b5343d19814c4c031897378cad2897961617",
+        "ncnn/rife/rife-v4.24/flownet.bin": "3d7f145c00ee9a409a818c359195a916488f16a603a1c0bdaadc8683fc5412e1",
+        "ncnn/rife/rife-v4.24/flownet.param": "67ddc8edaafd5ba90393b831fa07d653c4a7938e74d37393564af085b650d67b",
+        "ncnn/rife/rife-v4.25-heavy/flownet.bin": "9b4c71aa1f6d6265585f39e0ea670e52dcf73d43f897e7fc44e5b5563ed2cfb9",
+        "ncnn/rife/rife-v4.25-heavy/flownet.param": "7ed289c79faf3985cf4fd455c3b9ea25b363c1f477323f12ab3582a1c1f1ba4b",
+        "ncnn/rife/rife-v4.25-lite/flownet.bin": "350a15e464bea5ad378e06c0fb43996e90a0d35653d5a6ef6bc980d832538fb7",
+        "ncnn/rife/rife-v4.25-lite/flownet.param": "e55b76f197b89637dc824ce89e64878df419214d3cf6a10aea0283c61b93a908",
+        "ncnn/rife/rife-v4.25/flownet.bin": "10de487a095e61cb2971c39e3b5e17005a70fba6201c77fb96e063f4423b583f",
+        "ncnn/rife/rife-v4.25/flownet.param": "6ba231fb00e4ae82b120f938d9b2df91db32fbf322bd110f29450efaf61848d6",
+        "ncnn/rife/rife-v4.26-large/flownet.bin": "6b2606352ff5c7da1c0affcea3a572e651c02ead1d2514b9670f1d67769cbdd2",
+        "ncnn/rife/rife-v4.26-large/flownet.param": "5b26d92a5d67f95f8d95dc2d3360c30ec4576128dc7505a5475127a022234e86",
+        "ncnn/rife/rife-v4.26/flownet.bin": "94d58e30b75d7c7609cfa6f3bdad524deddd14f5f75e85c36d2f827ef5c64731",
+        "ncnn/rife/rife-v4.26/flownet.param": "79f16c28903f93f8308f0c4c947f8c7e0c17d99a57b85473e5f298dd578d137b"
+      },
+      "installed_size": 0,
+      "sha256": ""
     },
     "rife-pytorch": {
       "archive": "lve-model-rife-pytorch.zip",
-      "archive_size": 22903705,
+      "archive_size": 10630914,
       "files": {
-        "fi/flownet.pkl": "6615790efd627772917205db291f51cd392528a157ecbb2ecaeec3bff8eb6de2"
+        "fi/rife_v4.27_fluidframes.pth": "4d7ed731289b45d55ff67083aa08c41084d28fd8c9670abe2fc8d2ed078f8722"
       },
-      "installed_size": 24636301,
-      "sha256": "83148008ba9e038ad77727c56aebb095ebe2d549cb38608690c6ef79a20784d1"
+      "installed_size": 11359447,
+      "sha256": "96fd7c571c796e42b6412936ba3d01fec665e48b36ebc99afa7bf5efd9a69c4a"
+    },
+    "rife-torch-models": {
+      "archive": "lve-model-rife-torch-models.zip",
+      "archive_size": 242113219,
+      "files": {
+        "fi/flownet.pkl": "6615790efd627772917205db291f51cd392528a157ecbb2ecaeec3bff8eb6de2",
+        "fi/rife_v4.20.pth": "f46e2a8b1794ec80c5ce84e6c6359ffa2d15f5ce6bd2b8f484252ff6ffba8e7e",
+        "fi/rife_v4.21.pth": "56d90eabc24d9f394594a184ebff1becbcb9424ea60581d80444f87e0da7770c",
+        "fi/rife_v4.22-lite.pth": "8f6fb9105ba9e946762ee7190acbca3ca1cf14193eb81ca0955d492fb8558692",
+        "fi/rife_v4.22.pth": "549df85a6e5b55c4488864b21d4c9b35f415070bbb62c22c3cb6bf788c3d4af5",
+        "fi/rife_v4.25-lite.pth": "81cdba223fe72a120130cc8552e5d2ecac824259d406f0c15323b3decf96b8b1",
+        "fi/rife_v4.26.pth": "45c7f74156704769dc9f85cfcaf8552e1e926f9399dcfa3a553dee88fac6f53f"
+      },
+      "installed_size": 0,
+      "sha256": ""
     },
     "seedvr2-3b-fp8": {
       "archive": "seedvr2-3b-fp8",
@@ -137,9 +229,27 @@
       "installed_size": 0,
       "sha256": ""
     },
+    "seedvr2-7b-q4": {
+      "archive": "seedvr2-7b-q4",
+      "archive_size": 4758306592,
+      "files": {
+        "seedvr2-7b-q4/seedvr2_ema_7b-Q4_K_M.gguf": "db9cb2ad90ebd40d2e8c29da2b3fc6fd03ba87cd58cbadceccca13ad27162789"
+      },
+      "installed_size": 0,
+      "sha256": ""
+    },
+    "seedvr2-7b-sharp-q4": {
+      "archive": "seedvr2-7b-sharp-q4",
+      "archive_size": 4758306592,
+      "files": {
+        "seedvr2-7b-sharp-q4/seedvr2_ema_7b_sharp-Q4_K_M.gguf": "7aed800ac4eb8e0d18569a954c0ff35f5a1caa3ed5d920e66cc31405f75b6e69"
+      },
+      "installed_size": 0,
+      "sha256": ""
+    },
     "span-ncnn": {
       "archive": "lve-model-span-ncnn.zip",
-      "archive_size": 6829667,
+      "archive_size": 6846138,
       "files": {
         "ncnn/span/spanx2_ch48.bin": "9a3b1c2485c1e93ad03124e20c2fa26843c4fb579384a46bd0d16cbf7f6b7fb3",
         "ncnn/span/spanx2_ch48.param": "242d27ddb549a7f5f2996801d1383e114428b6e403afc6405c54b575cb31224f",
@@ -151,7 +261,46 @@
         "ncnn/span/spanx4_ch52.param": "7ccc747533e5c7d23ae25c84ba0aa0bf5cf1b221d939e94f81049887661e1053"
       },
       "installed_size": 7289976,
-      "sha256": "1398a73017f3bf53aae7a7d35aa98c1d45bbafdc4f9930974e9eb76ad2faac0d"
+      "sha256": "b5821120f5946e54756ad0924272d328606ba66c509a1c2f46950eeaa374ed5f"
+    },
+    "sparkvsr-stage2": {
+      "archive": "sparkvsr-stage2",
+      "archive_size": 42199097809,
+      "files": {
+        "sparkvsr-stage2/model_index.json": "cf8378a2d8f65b1484764dd4d9e65ef650f0fb58d9abf674be11b9d26e77fa94",
+        "sparkvsr-stage2/scheduler/scheduler_config.json": "8c821359b9f0d625d87d0c9f095343e2c790acdf89b622dd020a2241647090ae",
+        "sparkvsr-stage2/text_encoder/config.json": "2b64ff3ea7f74ae9b2019daa8d48fc7b89685bdaad548ce541378e22934c3b07",
+        "sparkvsr-stage2/text_encoder/model-00001-of-00004.safetensors": "8e0e98242fed1de128a73ee6fee174aa30186c66f7d70811c8ebf67d72067f38",
+        "sparkvsr-stage2/text_encoder/model-00002-of-00004.safetensors": "7309a33cd1780b20e3d84b2e14585d7a64ccea45079aecc86c507e381e00ed14",
+        "sparkvsr-stage2/text_encoder/model-00003-of-00004.safetensors": "d278bf7cb4de9957cb67d8a92dc9273f88186f0c90e0f2a3de13882217d9a95c",
+        "sparkvsr-stage2/text_encoder/model-00004-of-00004.safetensors": "69afce9a62402b82095baa1dfef572be92dfd9a4062693d49a5948e4d27585a5",
+        "sparkvsr-stage2/text_encoder/model.safetensors.index.json": "a545bb25dc0f423d84be7b577311bba8bb7c6931f1eefcea65fc8b0a61a60a76",
+        "sparkvsr-stage2/tokenizer/added_tokens.json": "ea5a91a3234f66ea642c8e672d67f0f493759a9bee6910ae304ea9b9492118b5",
+        "sparkvsr-stage2/tokenizer/special_tokens_map.json": "7a1985a994c41886db38c719d2a3d2f40606663cc19d7c5d6a85d349320e06d2",
+        "sparkvsr-stage2/tokenizer/spiece.model": "d60acb128cf7b7f2536e8f38a5b18a05535c9e14c7a355904270e15b0945ea86",
+        "sparkvsr-stage2/tokenizer/tokenizer_config.json": "9c4f8a92630f7c6cc082831b291d6f46f18455d69d1a2a52c9b5f5303ab01469",
+        "sparkvsr-stage2/transformer/config.json": "d12248f8e683cb4b619c6444e0d9d798c4a6e2fecf6b4e3d5b619ad4e93c2936",
+        "sparkvsr-stage2/transformer/diffusion_pytorch_model-00001-of-00005.safetensors": "94f98d9d81a66822b1f70add0b57a651df73726071d5f7d832361e5478061490",
+        "sparkvsr-stage2/transformer/diffusion_pytorch_model-00002-of-00005.safetensors": "6a11deeb4f2b874410a8e8399a9a56da53704058f7afec38fc82f94202c7d1fb",
+        "sparkvsr-stage2/transformer/diffusion_pytorch_model-00003-of-00005.safetensors": "5e23bdb33982887f21197504624dd9b026cd7adc2e2775c5f6b51ac1b93751ac",
+        "sparkvsr-stage2/transformer/diffusion_pytorch_model-00004-of-00005.safetensors": "275ef2857f6106b4eb1d06f1da28889a5a686144893f3a0c1237d14d2b4629bd",
+        "sparkvsr-stage2/transformer/diffusion_pytorch_model-00005-of-00005.safetensors": "8ab0b18ca0bb6f4166a2421ba04b8830fb29363075b7cadf35f4825f4f1fc0be",
+        "sparkvsr-stage2/transformer/diffusion_pytorch_model.safetensors.index.json": "37903d14f3bfdfbc667787059a74890e62bfad2094b43215c0081537c1e40b88",
+        "sparkvsr-stage2/vae/config.json": "cdc0a3c6c363878ad18920842b001fd16e7d65dceb1810d30a694be062e77e91",
+        "sparkvsr-stage2/vae/diffusion_pytorch_model.safetensors": "a410e48d988c8224cef392b68db0654485cfd41f345f4a3a81d3e6b765bb995e"
+      },
+      "installed_size": 0,
+      "sha256": ""
+    },
+    "vfimamba": {
+      "archive": "vfimamba",
+      "archive_size": 331712554,
+      "files": {
+        "vfimamba/VFIMamba.pkl": "c1dac5b08f4c41e95452f7a41b35347409fc58b0e25b3ba8de899144ff28a350",
+        "vfimamba/VFIMamba_S.pkl": "ddc1e07e5917f1bbd254ca77e077354cf822c9af6cacd1434136e86b9961acc7"
+      },
+      "installed_size": 0,
+      "sha256": ""
     }
   },
   "protocol_version": 1

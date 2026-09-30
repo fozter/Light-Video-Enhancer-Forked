@@ -7,6 +7,7 @@ from typing import Iterable, Optional
 
 from . import __version__
 from .encoding import CLI_CODEC_CHOICES
+from .fi.rife import RIFE_TORCH_MODEL_TOKENS
 from .fi.rife_ncnn import RIFE_NCNN_MODEL_TOKENS
 
 
@@ -146,7 +147,12 @@ def interactive_arguments() -> Optional[list]:
             return None
     fi_model = None
     fi_quality = None
-    if fi_engine == "rife_ncnn":
+    if fi_engine == "rife":
+        print("Optional RIFE PyTorch models 4.20-4.26 download with: --download-model rife-torch-models")
+        fi_model = _choice("RIFE PyTorch model", RIFE_TORCH_MODEL_TOKENS, "4.27_fluidframes")
+        if fi_model is None:
+            return None
+    elif fi_engine == "rife_ncnn":
         print("Optional RIFE models 4.20-4.26 download with: --download-model rife-ncnn-models")
         fi_model = _choice("RIFE ncnn model", RIFE_NCNN_MODEL_TOKENS, "4.27_fluidframes")
         if fi_model is None:

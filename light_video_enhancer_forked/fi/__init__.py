@@ -8,8 +8,11 @@ def create_fi_engine(engine_name: str, device: str = "auto",
                      torch_python: Optional[str] = None,
                      ncnn_gpu: Optional[int] = None) -> FrameInterpolationEngine:
     if engine_name == "rife":
-        from .rife import RIFEEngine
-        return RIFEEngine(device=device, torch_python=torch_python)
+        from .rife import RIFEEngine, RIFE_TORCH_MODELS
+        # The token selects the architecture and weights; the classic
+        # quality tiers are not interpreted by the PyTorch engine.
+        model = quality if quality in RIFE_TORCH_MODELS else None
+        return RIFEEngine(device=device, torch_python=torch_python, model=model)
     if engine_name == "ema_vfi":
         from .ema_vfi import EMAVFIEngine
         return EMAVFIEngine(device=device, quality=quality, torch_python=torch_python)

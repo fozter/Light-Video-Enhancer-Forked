@@ -590,7 +590,7 @@ class VideoEnhancer:
                 raise RuntimeError("No CUDA Python environment satisfying the VFIMamba dependencies was found")
             fi_quality = cfg.fi_quality
             if cfg.fi_model:
-                if cfg.fi_engine in ("rife_ncnn", "rife_ncnn_427"):
+                if cfg.fi_engine in ("rife", "rife_ncnn", "rife_ncnn_427"):
                     fi_quality = cfg.fi_model
                 else:
                     _log.info("Ignoring the RIFE model selection: the %s "

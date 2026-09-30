@@ -4,7 +4,7 @@
 It does not require the WinUI frontend, Python, .NET, or Tkinter on the target
 computer.
 
-This copy documents backend version 0.0.1, part of the Light Video Enhancer-Forked
+This copy documents backend version 0.0.3, part of the Light Video Enhancer-Forked
 WinUI 3 package (GUI 0.0.1). Run `--help` on your exact build for the
 authoritative option list and defaults.
 
@@ -78,8 +78,8 @@ Lossless FFV1 output (see the FFV1 note below for the requirements):
   `h265`), `av1_nvenc`, `av1_amf`, `libsvtav1` (`svt-av1`),
   `libaom-av1` (`aom`), `mpeg4`, and `ffv1` (lossless; requires an MKV
   container)
-- Quality: `fast`, `balanced`, `quality`, `ultra` (the `rife_ncnn` engine
-  ignores these tiers and uses `--fi-model` instead)
+- Quality: `fast`, `balanced`, `quality`, `ultra` (the `rife` and
+  `rife_ncnn` engines ignore these tiers and use `--fi-model` instead)
 - Container: `mp4`, `mkv`, `mov`
 - NCNN device: `auto`, `cpu`, or a Vulkan GPU index (`0`, `1`, …).
   `span` and `ifrnet_ncnn` require a Vulkan GPU and reject `cpu`.
@@ -111,6 +111,30 @@ The `rife_ncnn` engine picks its network with `--fi-model`:
   exports exist for these versions.
 - The WinUI frontend exposes the same list in the Model dropdown that
   replaces the Quality dropdown while the RIFE ncnn-vulkan engine is
+  selected.
+
+## RIFE AI (PyTorch) models
+
+The `rife` (PyTorch) engine picks its network with `--fi-model` the same
+way (it needs a CUDA PyTorch environment):
+
+```powershell
+.\LightVideoEnhancerForked-Backend.exe input.mp4 -o output.mp4 `
+  --sr-engine none --fi-engine rife --fi-model 4.26 --fi-multiplier 2
+```
+
+- `4.27_fluidframes` (the bundled FluidFrames 2026.3 conversion) is the
+  default and the only model that ships with the app.
+- The optional weights (hzwer Practical-RIFE checkpoints, listed newest
+  first) download with `--download-model rife-torch-models` (about
+  231 MiB) or from the Models & Downloads tab of the WinUI frontend:
+  `4.26`, `4.25`, `4.25 Lite`, `4.22`, `4.22 Lite`, `4.21`, and `4.20`.
+- The list mirrors the ncnn engine where the versions coincide. The
+  ncnn-only variants (`4.26 Large`, `4.25 Heavy`, `4.24`, `4.23`) have no
+  published PyTorch checkpoints; use the RIFE ncnn-vulkan engine for
+  those.
+- The WinUI frontend exposes the same list in the Model dropdown that
+  replaces the Quality dropdown while the RIFE AI (PyTorch) engine is
   selected.
 
 ## Target frame rate

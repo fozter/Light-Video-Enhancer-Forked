@@ -29,14 +29,18 @@ downloadable component and its license, and
   2026.3 ONNX export, validated against the reference) is the default;
   4.20–4.26 (with lite/heavy/large variants) download on demand. Select the
   model in the GUI dropdown or with `--fi-model`.
+- **RIFE AI (PyTorch), one engine, eight models.** The CUDA engine gained
+  the same model menu: the bundled `4.27_fluidframes` conversion ships
+  with the app, and the optional 4.20–4.26 hzwer Practical-RIFE
+  checkpoints (including `4.25`; about 231 MiB) download on demand.
 - **Frame-rate targeting, exactly.** Multiply the source rate (×2/×3/×4) or
   set an exact output rate — including NTSC rationals such as
-  `24000/1001` (`59.94`) — and frames are added or dropped while duration is
+  `60000/1001` (`59.94`) — and frames are added or dropped while duration is
   preserved.
 - **No automatic engine selection.** Nothing is ever chosen "for you":
   defaults are No Resolution Change / No Interpolation, and every engine is
   an explicit choice.
-- **FFV1 lossless output** on the bundled FFmpeg 8.1 runtime (MKV
+- **FFV1 lossless output** on the bundled minimal FFmpeg 9.0.2 runtime (MKV
   container), alongside NVENC/AMF/Media Foundation/software H.264, HEVC,
   AV1, and MPEG-4 encoders.
 - **Scene & static-frame detection** with SSIM thresholds you can tune
@@ -109,13 +113,19 @@ verification) and run in isolated Python runtimes.
 ## Building from source
 
 Prerequisites: 64-bit Python 3.10+ (3.14 used for the shipped build), .NET
-SDK 10, and Git. The FFmpeg runtime DLLs are **not committed** to this
-repository (`avcodec-62.dll` alone exceeds GitHub's 100 MB file limit);
-fetch them first with the pinned downloader:
+SDK 10, and Git. The minimal FFmpeg 9.0.2 runtime DLLs ship in
+`light_video_enhancer_forked/ffmpeg_dlls/` (they are excluded from git by
+`.gitignore` but present in the source snapshot); verify them with
+`python tools\fetch_ffmpeg_runtime.py`. Rebuilding the runtime is only
+needed after changing its codec set — it requires MSYS2 (UCRT64 toolchain
+plus the `x264`, `x265`, `aom`, `svt-av1`, `dav1d`, `ffnvcodec-headers`,
+and `amf-headers` packages) and the pinned recipe
+`build_ffmpeg.sh` + `light_video_enhancer_forked/ffmpeg_bridge/build_worker.sh`
+(FFmpeg source at `<repo>/../ffmpeg`, FFmpeg 9.0.2 from https://ffmpeg.org).
 
 ```powershell
 python -m pip install -r requirements.txt pyinstaller>=6
-python tools\fetch_ffmpeg_runtime.py        # one-time, hash-verified
+python tools\fetch_ffmpeg_runtime.py        # verify the bundled runtime DLLs
 
 # Backend EXE (dist\LightVideoEnhancerForked-Backend-Full.exe)
 python build_exe.py --backend --profile full
@@ -139,7 +149,7 @@ automatically).
 | `light_video_enhancer_forked/` | Python backend package (pipeline, engines, encoders, model manager) |
 | `windows/LightVideoEnhancerForked.WinUI/` | WinUI 3 frontend |
 | `native/ncnn_worker/` | Sources for the fused NCNN Vulkan worker |
-| `tools/` | Build helpers, including the pinned FFmpeg runtime downloader |
+| `tools/` | Build helpers, including the FFmpeg runtime verifier |
 | `tests/` | Unit test suite |
 | `docs/` | Architecture notes and upstream release history |
 | `benchmarks/` | Pipeline benchmarks and engineering reports |

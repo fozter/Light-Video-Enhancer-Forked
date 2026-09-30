@@ -15,7 +15,7 @@ the software or its use.
 
 This project is an independent fork. It is **not affiliated with,
 endorsed by, or sponsored by** NVIDIA, ByteDance, Tencent, the ncnn
-authors, the FFmpeg project, BtbN, OpenCV, NumPy, Microsoft, or any of the
+authors, the FFmpeg project, MSYS2, OpenCV, NumPy, Microsoft, or any of the
 research groups behind the supported super-resolution or interpolation
 models. All trademarks belong to their respective owners.
 

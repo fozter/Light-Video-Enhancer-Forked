@@ -9,6 +9,7 @@ from typing import Dict, Iterable, List, Optional, Tuple
 
 from ._paths import model_file_exists, pkg_file_exists
 from .encoding import CODEC_CHOICES, canonical_codec
+from .fi.rife import DEFAULT_RIFE_TORCH_MODEL, RIFE_TORCH_MODELS
 from .fi.rife_ncnn import RIFE_NCNN_MODELS
 
 
@@ -86,7 +87,10 @@ def quick_capabilities() -> Dict[str, object]:
         worker = False
         encoders = ()
 
-    rife_model = model_file_exists("fi", "flownet.pkl")
+    # The torch RIFE engine is usable when its default (bundled) model's
+    # weights are present; the optional models report through
+    # rife_torch_models below.
+    rife_model = RIFE_TORCH_MODELS[DEFAULT_RIFE_TORCH_MODEL].weight_file_exists()
     ema_vfi_model = model_file_exists(
         "fi", "ema_vfi", "ours_small_t.pkl")
     vfimamba_model = (
@@ -187,6 +191,10 @@ def quick_capabilities() -> Dict[str, object]:
         "torch_current": _has_current_module("torch"),
         "nvvfx_current": _has_current_module("nvvfx"),
         "rife_model": rife_model,
+        "rife_torch_models": [
+            token for token, model in RIFE_TORCH_MODELS.items()
+            if model.weight_file_exists()
+        ],
         "ema_vfi_model": ema_vfi_model,
         "vfimamba_model": vfimamba_model,
         "flashvsr_model": flashvsr_model,

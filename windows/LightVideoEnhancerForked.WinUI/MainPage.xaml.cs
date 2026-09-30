@@ -63,9 +63,33 @@ public sealed partial class MainPage : Page
         ("4.20", "4.20"),
     ];
     private const string DefaultRifeNcnnModel = "4.27_fluidframes";
-    private bool _fiQualityShowsModels;
+
+    // Mirrors the backend RIFE PyTorch model registry (fi/rife.py).
+    private static readonly (string Token, string Display)[] RifeTorchModels =
+    [
+        ("4.27_fluidframes", "4.27 (FluidFrames)"),
+        ("4.26", "4.26"),
+        ("4.25", "4.25"),
+        ("4.25-lite", "4.25 Lite"),
+        ("4.22", "4.22"),
+        ("4.22-lite", "4.22 Lite"),
+        ("4.21", "4.21"),
+        ("4.20", "4.20"),
+    ];
+    private const string DefaultRifeTorchModel = "4.27_fluidframes";
+
+    // Which list the FI quality box currently shows: the shared quality
+    // tiers, the RIFE ncnn model list, or the RIFE PyTorch model list.
+    private enum FiQualityContent
+    {
+        QualityTiers,
+        RifeNcnnModels,
+        RifeTorchModels,
+    }
+    private FiQualityContent _fiQualityContent = FiQualityContent.QualityTiers;
     private int _fiQualityTierIndex = 2;
-    private string _rifeModelSelection = DefaultRifeNcnnModel;
+    private string _rifeNcnnModelSelection = DefaultRifeNcnnModel;
+    private string _rifeTorchModelSelection = DefaultRifeTorchModel;
 
     public MainPage()
     {
@@ -264,7 +288,13 @@ public sealed partial class MainPage : Page
         {
             // The RIFE ncnn engine selects its model here instead of a
             // quality tier.
-            ShowRifeModelChoices();
+            ShowRifeModelChoices(FiQualityContent.RifeNcnnModels);
+            FiQualityBox.IsEnabled = true;
+        }
+        else if (fi == "rife")
+        {
+            // The RIFE PyTorch engine selects its model the same way.
+            ShowRifeModelChoices(FiQualityContent.RifeTorchModels);
             FiQualityBox.IsEnabled = true;
         }
         else
@@ -275,32 +305,38 @@ public sealed partial class MainPage : Page
         SuggestOutputPath();
     }
 
-    private void ShowRifeModelChoices()
+    private static (string Token, string Display)[] ModelListFor(
+        FiQualityContent content) =>
+        content == FiQualityContent.RifeNcnnModels ? RifeNcnnModels : RifeTorchModels;
+
+    private void ShowRifeModelChoices(FiQualityContent content)
     {
-        if (!_fiQualityShowsModels)
+        if (_fiQualityContent != content)
         {
-            _fiQualityTierIndex = Math.Max(FiQualityBox.SelectedIndex, 0);
-            _fiQualityShowsModels = true;
+            RememberFiQualitySelection();
+            _fiQualityContent = content;
             FiQualityBox.Items.Clear();
-            foreach ((string token, string display) in RifeNcnnModels)
+            foreach ((string token, string display) in ModelListFor(content))
             {
                 FiQualityBox.Items.Add(new ComboBoxItem { Content = display, Tag = token });
             }
             FiQualityBox.Header = "Model";
             ToolTipService.SetToolTip(FiQualityBox,
-                "Selects the RIFE ncnn-vulkan model. The optional 4.20-4.26 models install from Models & Downloads.");
+                content == FiQualityContent.RifeNcnnModels
+                    ? "Selects the RIFE ncnn-vulkan model. The optional 4.20-4.26 models install from Models & Downloads."
+                    : "Selects the RIFE PyTorch model. The bundled 4.27 (FluidFrames) weights ship with the app; the optional 4.20-4.26 weights install from Models & Downloads.");
         }
         UpdateRifeModelItemStates();
     }
 
     private void ShowQualityTierChoices()
     {
-        if (!_fiQualityShowsModels)
+        if (_fiQualityContent == FiQualityContent.QualityTiers)
         {
             return;
         }
-        _rifeModelSelection = SelectedTag(FiQualityBox, DefaultRifeNcnnModel);
-        _fiQualityShowsModels = false;
+        RememberFiQualitySelection();
+        _fiQualityContent = FiQualityContent.QualityTiers;
         FiQualityBox.Items.Clear();
         FiQualityBox.Items.Add(new ComboBoxItem { Content = "Fast", Tag = "fast" });
         FiQualityBox.Items.Add(new ComboBoxItem { Content = "Balanced", Tag = "balanced" });
@@ -312,25 +348,56 @@ public sealed partial class MainPage : Page
         FiQualityBox.SelectedIndex = Math.Clamp(_fiQualityTierIndex, 0, 3);
     }
 
+    private void RememberFiQualitySelection()
+    {
+        if (_fiQualityContent == FiQualityContent.QualityTiers)
+        {
+            _fiQualityTierIndex = Math.Max(FiQualityBox.SelectedIndex, 0);
+            return;
+        }
+        string selection = SelectedTag(FiQualityBox,
+            _fiQualityContent == FiQualityContent.RifeNcnnModels
+                ? DefaultRifeNcnnModel : DefaultRifeTorchModel);
+        if (_fiQualityContent == FiQualityContent.RifeNcnnModels)
+        {
+            _rifeNcnnModelSelection = selection;
+        }
+        else
+        {
+            _rifeTorchModelSelection = selection;
+        }
+    }
+
     private void UpdateRifeModelItemStates()
     {
-        if (!_fiQualityShowsModels)
+        if (_fiQualityContent == FiQualityContent.QualityTiers)
         {
             return;
         }
+        bool ncnn = _fiQualityContent == FiQualityContent.RifeNcnnModels;
+        string[] available = ncnn ? _rifeNcnnModels : _rifeTorchModels;
+        string remembered = ncnn ? _rifeNcnnModelSelection : _rifeTorchModelSelection;
         if (FiQualityBox.SelectedItem is ComboBoxItem current &&
             current.Tag?.ToString() is string currentToken)
         {
-            _rifeModelSelection = currentToken;
+            remembered = currentToken;
+            if (ncnn)
+            {
+                _rifeNcnnModelSelection = currentToken;
+            }
+            else
+            {
+                _rifeTorchModelSelection = currentToken;
+            }
         }
         ComboBoxItem? target = null;
         foreach (object? entry in FiQualityBox.Items)
         {
             if (entry is ComboBoxItem item && item.Tag?.ToString() is string token)
             {
-                item.IsEnabled = _rifeNcnnModels.Contains(token);
+                item.IsEnabled = available.Contains(token);
                 if (target is null &&
-                    string.Equals(token, _rifeModelSelection, StringComparison.Ordinal) &&
+                    string.Equals(token, remembered, StringComparison.Ordinal) &&
                     item.IsEnabled)
                 {
                     target = item;
@@ -995,8 +1062,10 @@ public sealed partial class MainPage : Page
         string fiEngine = SelectedTag(FiEngineBox, "none");
         ValidateExternalEngineSelection(
             srEngine, fiEngine,
-            fiEngine == "rife_ncnn"
-                ? SelectedTag(FiQualityBox, DefaultRifeNcnnModel) : null);
+            fiEngine is "rife_ncnn" or "rife"
+                ? SelectedTag(FiQualityBox, fiEngine == "rife_ncnn"
+                    ? DefaultRifeNcnnModel : DefaultRifeTorchModel)
+                : null);
         if (srEngine == "osdenhancer" && fiEngine is not "none")
         {
             throw new ArgumentException("OSDEnhancer already includes 2x interpolation; set the separate interpolation engine to None.");
@@ -1041,12 +1110,13 @@ public sealed partial class MainPage : Page
             });
         }
 
-        // The RIFE ncnn engine picks a model instead of a quality tier.
-        if (fiEngine == "rife_ncnn")
+        // Both RIFE engines pick a model instead of a quality tier.
+        if (fiEngine is "rife_ncnn" or "rife")
         {
             values.AddRange(new[]
             {
-                "--fi-model", SelectedTag(FiQualityBox, DefaultRifeNcnnModel),
+                "--fi-model", SelectedTag(FiQualityBox, fiEngine == "rife_ncnn"
+                    ? DefaultRifeNcnnModel : DefaultRifeTorchModel),
             });
         }
         else
@@ -1170,6 +1240,18 @@ public sealed partial class MainPage : Page
         AppendCapability(text, root, "worker", "FFmpeg Worker");
         AppendCapability(text, root, "vsr_dll", "D3D11 VSR Bridge");
         AppendCapability(text, root, "rife_model", "RIFE PyTorch model");
+        if (root.TryGetProperty("rife_torch_models", out JsonElement torchRifeModels) &&
+            torchRifeModels.ValueKind == JsonValueKind.Array)
+        {
+            string torchModels = string.Join(", ", torchRifeModels.EnumerateArray()
+                .Where(element => element.ValueKind == JsonValueKind.String)
+                .Select(element => element.GetString() ?? string.Empty)
+                .Where(token => token.Length > 0));
+            if (torchModels.Length > 0)
+            {
+                text.AppendLine($"  RIFE PyTorch models: {torchModels}");
+            }
+        }
         AppendCapability(text, root, "ncnn_rife", "RIFE ncnn-vulkan");
         if (root.TryGetProperty("ncnn_rife_models", out JsonElement rifeModels) &&
             rifeModels.ValueKind == JsonValueKind.Array)

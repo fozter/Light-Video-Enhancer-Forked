@@ -12,7 +12,7 @@ if HERE not in sys.path:
     sys.path.insert(0, HERE)
 
 from _shared_frames import SharedNDArray, read_framed, write_framed
-from fi._rife_model import FlownetCas
+from fi._rife_model import RIFE427
 
 
 def _read():
@@ -24,13 +24,22 @@ def _write(value) -> None:
 
 
 def _load_rife(path, device):
-    model = FlownetCas().to(device).eval()
+    # The bundled v4.27 (FluidFrames) network; the only torch RIFE model
+    # that ships with the app.
+    model = RIFE427().to(device).eval()
     state = torch.load(path, map_location=device)
     if isinstance(state, dict) and "state_dict" in state:
         state = state["state_dict"]
     if any(key.startswith("module.") for key in state):
         state = {key.replace("module.", "", 1): value for key, value in state.items()}
-    model.load_state_dict(state, strict=False)
+    missing, unexpected = model.load_state_dict(state, strict=False)
+    if missing:
+        raise RuntimeError(
+            "The RIFE weights do not match the v4.27 architecture "
+            "(%d missing keys)" % len(missing))
+    if unexpected:
+        raise RuntimeError(
+            "The RIFE weights carry %d unexpected keys" % len(unexpected))
     return model.half()
 
 

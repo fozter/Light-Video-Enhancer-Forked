@@ -37,13 +37,18 @@ class LanguageAndCliTests(unittest.TestCase):
     def test_interactive_nvvfx_rife_arguments_complete_after_overwrite(self):
         responses = iter([
             __file__, "", "", "nvvfx", "rife", "", "",
-            "ultra", "ultra", "av1_nvenc", "y", "y",
+            "", "ultra", "av1_nvenc", "y", "y",
         ])
         with mock.patch("builtins.input", side_effect=lambda prompt: next(responses)):
             arguments = interactive_arguments()
         self.assertIn("--overwrite", arguments)
         self.assertEqual(arguments[arguments.index("--sr-engine") + 1], "nvvfx")
         self.assertEqual(arguments[arguments.index("--fi-engine") + 1], "rife")
+        # The torch engine asks for a model instead of a quality tier; the
+        # blank answer accepts the bundled default.
+        self.assertEqual(arguments[arguments.index("--fi-model") + 1],
+                         "4.27_fluidframes")
+        self.assertNotIn("--fi-quality", arguments)
         self.assertEqual(arguments[arguments.index("--codec") + 1], "av1_nvenc")
 
 

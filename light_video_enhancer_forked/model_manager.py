@@ -76,8 +76,50 @@ MODEL_PACKS = (
     _pack(
         "rife-pytorch", "lve-model-rife-pytorch.zip",
         "RIFE PyTorch interpolation",
-        "High-quality CUDA interpolation; requires an external PyTorch environment.",
-        ["fi/flownet.pkl"],
+        "High-quality CUDA interpolation; bundles the v4.27 (FluidFrames) weights. The v4.25 and 4.20-4.26 PyTorch weights install from the RIFE PyTorch models pack.",
+        ["fi/rife_v4.27_fluidframes.pth"],
+    ),
+    _remote_pack(
+        "rife-torch-models", "lve-model-rife-torch-models.zip",
+        "RIFE PyTorch models 4.20-4.26 (optional, about 231 MiB)",
+        "Additional RIFE PyTorch weights (4.20, 4.21, 4.22, 4.22 Lite, 4.25, 4.25 Lite, 4.26) from the hzwer Practical-RIFE releases; select them from the RIFE AI (PyTorch) model list after downloading. The only bundled model is 4.27 (FluidFrames).",
+        [
+            "fi/rife_v4.20.pth",
+            "fi/rife_v4.21.pth",
+            "fi/rife_v4.22.pth",
+            "fi/rife_v4.22-lite.pth",
+            "fi/flownet.pkl",
+            "fi/rife_v4.25-lite.pth",
+            "fi/rife_v4.26.pth",
+        ],
+        downloads={
+            "fi/rife_v4.20.pth": "rife_v4.20.pth",
+            "fi/rife_v4.21.pth": "rife_v4.21.pth",
+            "fi/rife_v4.22.pth": "rife_v4.22.pth",
+            "fi/rife_v4.22-lite.pth": "rife_v4.22-lite.pth",
+            "fi/flownet.pkl": "flownet.pkl",
+            "fi/rife_v4.25-lite.pth": "rife_v4.25-lite.pth",
+            "fi/rife_v4.26.pth": "rife_v4.26.pth",
+        },
+        official_base="https://github.com/fozter/Light-Video-Enhancer-Forked/releases/download/models-torch-v1/{file}",
+        mirror_base="https://ghproxy.net/https://github.com/fozter/Light-Video-Enhancer-Forked/releases/download/models-torch-v1/{file}",
+        download_size=242113219,
+        hashes={
+            "fi/rife_v4.20.pth":
+                "f46e2a8b1794ec80c5ce84e6c6359ffa2d15f5ce6bd2b8f484252ff6ffba8e7e",
+            "fi/rife_v4.21.pth":
+                "56d90eabc24d9f394594a184ebff1becbcb9424ea60581d80444f87e0da7770c",
+            "fi/rife_v4.22.pth":
+                "549df85a6e5b55c4488864b21d4c9b35f415070bbb62c22c3cb6bf788c3d4af5",
+            "fi/rife_v4.22-lite.pth":
+                "8f6fb9105ba9e946762ee7190acbca3ca1cf14193eb81ca0955d492fb8558692",
+            "fi/flownet.pkl":
+                "6615790efd627772917205db291f51cd392528a157ecbb2ecaeec3bff8eb6de2",
+            "fi/rife_v4.25-lite.pth":
+                "81cdba223fe72a120130cc8552e5d2ecac824259d406f0c15323b3decf96b8b1",
+            "fi/rife_v4.26.pth":
+                "45c7f74156704769dc9f85cfcaf8552e1e926f9399dcfa3a553dee88fac6f53f",
+        },
     ),
     _pack(
         "ema-vfi-small", "lve-model-ema-vfi-small.zip",

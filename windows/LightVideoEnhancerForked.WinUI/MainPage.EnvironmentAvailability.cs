@@ -20,6 +20,7 @@ public sealed partial class MainPage
     private bool _vfiMambaModelAvailable;
     private string? _vfiMambaPython;
     private string[] _rifeNcnnModels = Array.Empty<string>();
+    private string[] _rifeTorchModels = Array.Empty<string>();
 
     private void UpdateExternalEngineAvailability()
     {
@@ -136,6 +137,19 @@ public sealed partial class MainPage
         {
             _rifeNcnnModels = Array.Empty<string>();
         }
+        if (capabilities.TryGetProperty("rife_torch_models", out JsonElement torchModels) &&
+            torchModels.ValueKind == JsonValueKind.Array)
+        {
+            _rifeTorchModels = torchModels.EnumerateArray()
+                .Where(element => element.ValueKind == JsonValueKind.String)
+                .Select(element => element.GetString() ?? string.Empty)
+                .Where(token => token.Length > 0)
+                .ToArray();
+        }
+        else
+        {
+            _rifeTorchModels = Array.Empty<string>();
+        }
         UpdateRifeModelItemStates();
         SetExternalEngineState(
             SrEngineBox, SpanSrItem, span,
@@ -233,6 +247,12 @@ public sealed partial class MainPage
         {
             throw new ArgumentException(
                 $"The RIFE ncnn-vulkan model {rifeModel} is not installed. Download the optional model pack on Models & downloads or pick another model.");
+        }
+        if (fiEngine == "rife" && rifeModel is not null &&
+            !_rifeTorchModels.Contains(rifeModel))
+        {
+            throw new ArgumentException(
+                $"The RIFE PyTorch model {rifeModel} is not installed. Download the optional model pack on Models & downloads or pick another model.");
         }
         if (fiEngine == "vfimamba" && !VfiMambaFiItem.IsEnabled)
         {

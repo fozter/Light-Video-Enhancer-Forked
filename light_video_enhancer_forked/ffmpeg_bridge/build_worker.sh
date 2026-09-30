@@ -16,7 +16,7 @@ echo "============================================"
 
 gcc -shared -O2 \
     -o "$SCRIPT_DIR/ffmpeg_worker.dll" \
-    "$SCRIPT_DIR/ffmpeg_worker_v8.c" \
+    "$SCRIPT_DIR/ffmpeg_worker.c" \
     -I"$FFMPEG_BUILD/include" \
     -L"$FFMPEG_BUILD/lib" \
     -L"$FFMPEG_BUILD/bin" \
@@ -26,16 +26,25 @@ gcc -shared -O2 \
 
 echo "  Copy FFmpeg runtime DLLs to $FFMPEG_DLLS"
 mkdir -p "$FFMPEG_DLLS"
-cp -v "$FFMPEG_BUILD/bin/"*.dll "$FFMPEG_DLLS/"
+rm -f "$FFMPEG_DLLS"/*.dll
+# FFmpeg ABI majors are pinned by the worker link line; wildcards keep the
+# script valid across a version bump. swresample is NOT shipped: nothing in
+# the closure imports it (worker links avformat/avcodec/avutil/swscale only).
 for runtime in \
+    "$FFMPEG_BUILD/bin/avcodec-"*.dll \
+    "$FFMPEG_BUILD/bin/avformat-"*.dll \
+    "$FFMPEG_BUILD/bin/avutil-"*.dll \
+    "$FFMPEG_BUILD/bin/swscale-"*.dll \
+    /ucrt64/bin/libx264-*.dll \
+    /ucrt64/bin/libx265-*.dll \
+    /ucrt64/bin/libaom.dll \
+    /ucrt64/bin/libdav1d-*.dll \
+    /ucrt64/bin/libSvtAv1Enc-*.dll \
     /ucrt64/bin/libiconv-2.dll \
     /ucrt64/bin/zlib1.dll \
-    /ucrt64/bin/libzstd.dll \
-    /ucrt64/bin/libdav1d-*.dll \
-    /ucrt64/bin/libaom.dll \
-    /ucrt64/bin/libSvtAv1Enc-*.dll \
-    /ucrt64/bin/libx264-*.dll \
-    /ucrt64/bin/libx265-*.dll; do
+    /ucrt64/bin/libgcc_s_seh-1.dll \
+    /ucrt64/bin/libstdc++-6.dll \
+    /ucrt64/bin/libwinpthread-1.dll; do
     [ -f "$runtime" ] && cp -v "$runtime" "$FFMPEG_DLLS/"
 done
 

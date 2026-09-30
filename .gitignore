@@ -37,9 +37,10 @@ Thumbs.db
 *.exp
 *.o
 *.obj
-# The FFmpeg shared runtime is fetched with tools/fetch_ffmpeg_runtime.py
-# (avcodec-62.dll exceeds GitHub's 100 MB per-file limit).
-light_video_enhancer_forked/ffmpeg_dlls/
+# The FFmpeg 9.0.2 shared runtime is our own minimal MSYS2 build
+# (build_ffmpeg.sh, ~58 MB, largest file 22.6 MB) and is committed with the
+# tree; nothing fetches it anymore (tools/fetch_ffmpeg_runtime.py verifies).
+!light_video_enhancer_forked/ffmpeg_dlls/*.dll
 !light_video_enhancer_forked/ffmpeg_bridge/*.dll
 !light_video_enhancer_forked/bridge/*.dll
 !light_video_enhancer_forked/ncnn/**/*.dll

@@ -66,11 +66,18 @@ class ProcessConfig:
         if self.fi_quality not in QUALITY_CHOICES:
             raise ValueError("Unknown interpolation quality: %s" % self.fi_quality)
         if self.fi_model is not None:
+            from .fi.rife import RIFE_TORCH_MODEL_TOKENS
             from .fi.rife_ncnn import RIFE_NCNN_MODEL_TOKENS
-            if self.fi_model not in RIFE_NCNN_MODEL_TOKENS:
-                raise ValueError("Unknown RIFE ncnn model: %s" % self.fi_model)
-            if self.fi_engine not in ("rife_ncnn", "rife_ncnn_427"):
+            if self.fi_engine == "rife":
+                if self.fi_model not in RIFE_TORCH_MODEL_TOKENS:
+                    raise ValueError(
+                        "Unknown RIFE PyTorch model: %s" % self.fi_model)
+            elif self.fi_engine in ("rife_ncnn", "rife_ncnn_427"):
+                if self.fi_model not in RIFE_NCNN_MODEL_TOKENS:
+                    raise ValueError("Unknown RIFE ncnn model: %s" % self.fi_model)
+            else:
                 raise ValueError(
-                    "The RIFE model selection requires the rife_ncnn engine")
+                    "The RIFE model selection requires the rife or "
+                    "rife_ncnn engine")
         if not 0.0 <= self.spark_reference_guidance <= 4.0:
             raise ValueError("The SparkVSR reference guidance strength must be between 0 and 4")

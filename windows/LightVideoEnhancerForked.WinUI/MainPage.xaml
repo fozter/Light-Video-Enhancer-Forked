@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8" ?>
 <Page
     x:Class="LightVideoEnhancerForked_WinUI.MainPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -187,7 +187,8 @@
                                 <ComboBox x:Name="FiEngineBox" Header="Engine"
                                           SelectionChanged="QualitySelection_Changed" HorizontalAlignment="Stretch">
                                     <ComboBoxItem x:Name="RifeFiItem" Content="RIFE AI (PyTorch)"
-                                                  Tag="rife" IsEnabled="False" />
+                                                  Tag="rife" IsEnabled="False"
+                                                  ToolTipService.ToolTip="CUDA interpolation. Pick the model in the Model dropdown: the bundled 4.27 (FluidFrames), or the optional 4.20-4.26 weights from Models &amp; Downloads." />
                                     <ComboBoxItem x:Name="EmaVfiFiItem" Content="EMA-VFI Small (PyTorch CUDA)"
                                                   Tag="ema_vfi" IsEnabled="False" />
                                     <ComboBoxItem x:Name="VfiMambaFiItem" Content="VFIMamba S / Full (PyTorch CUDA)"

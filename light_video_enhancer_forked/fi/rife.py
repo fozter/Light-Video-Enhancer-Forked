@@ -1,16 +1,37 @@
-"""RIFE v4.25 PyTorch interpolation (in-process or persistent subprocess)."""
+"""RIFE PyTorch interpolation (in-process or persistent subprocess).
+
+The engine is model-driven like its ncnn sibling: ``--fi-model`` carries a
+RIFE model token and the registry below pins, for every selectable model, the
+architecture class (fi/_rife_model.py), the weight file name under ``fi/``,
+and the display string.  One model ships with the app: v4.27 (the FluidFrames
+conversion, ``rife_v4.27_fluidframes.pth``).  The remaining weights — v4.25
+(the historical ``flownet.pkl``) down to v4.20 — install from the optional
+"rife-torch-models" pack.
+
+Architecture provenance (hzwer Practical-RIFE releases, MIT):
+
+- v4.20        four blocks [384, 192, 96, 48], 32-channel encoder, block
+               outputs carry no feature map (6 channels)
+- v4.21/v4.22  four blocks [256, 192, 96, 48], 32-channel encoder,
+               13-channel block outputs with feature feedback
+- v4.22 Lite   four blocks [192, 128, 64, 32], 16-channel encoder
+- v4.25/v4.26 five blocks [192, 128, 96, 64, 32], 16-channel encoder
+- v4.25 Lite   five blocks with a 24-channel block4 and a deeper scale list
+- v4.27        FluidFrames 2026.3 five-block IFNet (see
+               tools/convert_rife427_torch.py)
+"""
 
 import os
 import subprocess
 import threading
-from typing import List, Optional
+from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 
 from .base import FrameInterpolationEngine
 from ._scene_detect import PAIR_NORMAL, classify_pair, skipped_intermediates
 from .._logging import get_logger
-from .._paths import get_model_file, get_pkg_file
+from .._paths import get_model_file, get_pkg_file, model_file_exists
 from .._shared_frames import (
     SharedNDArray, close_process_pipes, read_framed, write_framed)
 
@@ -26,20 +47,51 @@ except (ImportError, OSError):
     _TORCH_AVAILABLE = False
 
 if _TORCH_AVAILABLE:
-    from ._rife_model import FlownetCas
+    from ._rife_model import RIFE_TORCH_ARCHITECTURES
 
 
-def _find_weight_file() -> Optional[str]:
-    names = ["flownet.pkl", "rife_v4.25.pth", "rife_v4.26.pth"]
-    for name in names:
-        path = get_model_file("fi", name)
-        if os.path.isfile(path):
-            return path
-    for name in names:
-        path = os.path.join(os.getcwd(), name)
-        if os.path.isfile(path):
-            return path
-    return None
+class RIFETorchModel:
+    """One selectable RIFE PyTorch model."""
+
+    __slots__ = ("token", "arch", "filename", "display", "bundled")
+
+    def __init__(self, token: str, arch: str, filename: str,
+                 display: str, bundled: bool = False):
+        self.token = token
+        self.arch = arch
+        self.filename = filename
+        self.display = display
+        self.bundled = bool(bundled)
+
+    def weight_file_exists(self) -> bool:
+        return model_file_exists("fi", self.filename)
+
+    def weight_path(self) -> str:
+        return get_model_file("fi", self.filename)
+
+
+# token, architecture class name (fi/_rife_model.py), weight file, display,
+# bundled flag.  Newest first, mirroring the ncnn registry where the versions
+# coincide: the GUI model list, the --fi-model choices, the capability
+# report, and the interactive wizard all follow this order.
+RIFE_TORCH_MODELS: Dict[str, RIFETorchModel] = {
+    token: RIFETorchModel(token, arch, filename, display, bundled)
+    for token, arch, filename, display, bundled in (
+        ("4.27_fluidframes", "RIFE427", "rife_v4.27_fluidframes.pth",
+         "4.27 (FluidFrames)", True),
+        ("4.26", "FlownetCas", "rife_v4.26.pth", "4.26", False),
+        ("4.25", "FlownetCas", "flownet.pkl", "4.25", False),
+        ("4.25-lite", "FlownetCasLite", "rife_v4.25-lite.pth",
+         "4.25 Lite", False),
+        ("4.22", "Flownet421", "rife_v4.22.pth", "4.22", False),
+        ("4.22-lite", "Flownet421Lite", "rife_v4.22-lite.pth",
+         "4.22 Lite", False),
+        ("4.21", "Flownet421", "rife_v4.21.pth", "4.21", False),
+        ("4.20", "Flownet420", "rife_v4.20.pth", "4.20", False),
+    )
+}
+DEFAULT_RIFE_TORCH_MODEL = "4.27_fluidframes"
+RIFE_TORCH_MODEL_TOKENS: Tuple[str, ...] = tuple(RIFE_TORCH_MODELS)
 
 
 def _pickle_write(pipe, obj) -> None:
@@ -67,10 +119,30 @@ def _unpack_array(value) -> np.ndarray:
     return result.reshape(shape).copy()
 
 
+def _clean_state_dict(state: dict) -> dict:
+    if isinstance(state, dict) and "state_dict" in state:
+        state = state["state_dict"]
+    if any(key.startswith("module.") for key in state):
+        state = {key.replace("module.", "", 1): value
+                 for key, value in state.items()}
+    return state
+
+
 class RIFEEngine(FrameInterpolationEngine):
-    def __init__(self, device: str = "auto", torch_python: Optional[str] = None):
+    """RIFE PyTorch interpolation with a selectable model.
+
+    ``model`` selects the architecture and weights when it carries a RIFE
+    model token (``4.20`` ... ``4.27_fluidframes``); the classic quality
+    tiers are no longer interpreted by this engine and fall back to the
+    default model.
+    """
+
+    def __init__(self, device: str = "auto", torch_python: Optional[str] = None,
+                 model: Optional[str] = None):
         self._requested_device = device
         self._torch_python = torch_python
+        self._model_def = RIFE_TORCH_MODELS.get(
+            model, RIFE_TORCH_MODELS[DEFAULT_RIFE_TORCH_MODEL])
         self._use_subprocess = False
         self._subproc = None
         self._stderr_thread = None
@@ -93,7 +165,7 @@ class RIFEEngine(FrameInterpolationEngine):
             mode = "subprocess-shm"
         else:
             mode = "subprocess" if self._use_subprocess else "in-process"
-        return "RIFE v4.25 (%s, %s)" % (precision, mode)
+        return "RIFE %s (%s, %s)" % (self._model_def.display, precision, mode)
 
     def initialize(self, src_width: int, src_height: int, multiplier: int = 2) -> None:
         if multiplier < 2:
@@ -105,9 +177,13 @@ class RIFEEngine(FrameInterpolationEngine):
         alignment = max(128, int(128 / self._scale))
         self._pad_w = ((src_width + alignment - 1) // alignment) * alignment - src_width
         self._pad_h = ((src_height + alignment - 1) // alignment) * alignment - src_height
-        self._model_path = _find_weight_file()
-        if not self._model_path:
-            raise FileNotFoundError("RIFE weights are missing: light_video_enhancer_forked/fi/flownet.pkl")
+        self._model_path = self._model_def.weight_path()
+        if not os.path.isfile(self._model_path):
+            hint = "" if self._model_def.bundled else (
+                " (download it with --download-model rife-torch-models)")
+            raise FileNotFoundError(
+                "RIFE %s weights are missing: light_video_enhancer_forked/fi/%s%s"
+                % (self._model_def.display, self._model_def.filename, hint))
 
         current_cuda = bool(_TORCH_AVAILABLE and torch.cuda.is_available())
         allow_cpu = self._requested_device == "cpu"
@@ -127,17 +203,21 @@ class RIFEEngine(FrameInterpolationEngine):
         if use_cuda:
             # Avoid a multi-second algorithm search before the first frame.
             torch.backends.cudnn.benchmark = False
-        self._model = FlownetCas().to(self._device).eval()
-        state = torch.load(self._model_path, map_location=self._device)
-        if isinstance(state, dict) and "state_dict" in state:
-            state = state["state_dict"]
-        if any(key.startswith("module.") for key in state):
-            state = {key.replace("module.", "", 1): value for key, value in state.items()}
+        arch = RIFE_TORCH_ARCHITECTURES[self._model_def.arch]
+        self._model = arch().to(self._device).eval()
+        state = _clean_state_dict(
+            torch.load(self._model_path, map_location=self._device))
         missing, unexpected = self._model.load_state_dict(state, strict=False)
         if missing:
-            _log.warning("RIFE weights are missing %d keys", len(missing))
+            raise RuntimeError(
+                "The RIFE %s weights do not match the architecture "
+                "(%d missing keys): %s" % (self._model_def.display, len(missing),
+                                           ", ".join(missing[:4])))
         if unexpected:
-            _log.warning("RIFE weights contain %d unused keys", len(unexpected))
+            # The hzwer releases carry the training-only teacher/caltime
+            # heads; they are never used at inference.
+            _log.debug("RIFE %s weights carry %d training-only keys",
+                       self._model_def.display, len(unexpected))
         if self._fp16:
             self._model.half()
 
@@ -176,7 +256,8 @@ class RIFEEngine(FrameInterpolationEngine):
         self._stderr_thread = threading.Thread(
             target=self._read_stderr, args=(self._subproc.stderr,), daemon=True)
         self._stderr_thread.start()
-        arguments = {"model_path": self._model_path, "fp16": True}
+        arguments = {"arch": self._model_def.arch,
+                     "model_path": self._model_path, "fp16": True}
         arguments.update(shared_args)
         _pickle_write(self._subproc.stdin, arguments)
         _pickle_write(self._subproc.stdin, [])

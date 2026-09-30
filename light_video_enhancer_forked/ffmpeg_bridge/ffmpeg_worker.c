@@ -39,6 +39,7 @@ typedef struct {
     int out_buf_size;
     int sws_src_w, sws_src_h, sws_src_fmt;
     int hw_mode;
+    int eof_sent;
 } DecoderState;
 
 static enum AVPixelFormat nve_decoder_get_format(
@@ -137,22 +138,17 @@ uint8_t* nve_decoder_read_frame(void *handle)
     if (!s) return NULL;
 
     while (1) {
-        int ret = av_read_frame(s->fmt_ctx, s->pkt);
-        if (ret < 0) return NULL;
+        /* 1. Deliver a frame the decoder already holds before feeding it more.
+           This is the documented send/receive ordering: draining first means
+           avcodec_send_packet can never report EAGAIN for a packet we then
+           would have to hold, and buffered B-frame output is never lost. */
+        int ret = avcodec_receive_frame(s->codec_ctx, s->frame);
+        if (ret == AVERROR_EOF)
+            return NULL; /* fully drained after the end-of-file flush */
+        if (ret < 0 && ret != AVERROR(EAGAIN))
+            return NULL; /* hard decode error */
 
-        if (s->pkt->stream_index != s->video_stream_idx) {
-            av_packet_unref(s->pkt);
-            continue;
-        }
-
-        ret = avcodec_send_packet(s->codec_ctx, s->pkt);
-        av_packet_unref(s->pkt);
-        if (ret < 0) continue;
-
-        while (1) {
-            ret = avcodec_receive_frame(s->codec_ctx, s->frame);
-            if (ret < 0) break;
-
+        if (ret == 0) {
             AVFrame *src = s->frame;
             int src_w = s->frame->width;
             int src_h = s->frame->height;
@@ -188,7 +184,35 @@ uint8_t* nve_decoder_read_frame(void *handle)
                           dst_data, dst_linesize);
                 return s->out_buf;
             }
+            return NULL; /* sws setup failed */
         }
+
+        /* 2. The decoder wants more input (EAGAIN above). */
+        if (s->eof_sent)
+            return NULL;
+        ret = av_read_frame(s->fmt_ctx, s->pkt);
+        if (ret < 0) {
+            av_packet_unref(s->pkt);
+            /* End of file: enter draining mode so delayed B-frame output
+               is delivered instead of dropped. */
+            avcodec_send_packet(s->codec_ctx, NULL);
+            s->eof_sent = 1;
+            continue;
+        }
+        if (s->pkt->stream_index != s->video_stream_idx) {
+            av_packet_unref(s->pkt);
+            continue;
+        }
+        ret = avcodec_send_packet(s->codec_ctx, s->pkt);
+        av_packet_unref(s->pkt);
+        if (ret == AVERROR_EOF)
+            return NULL; /* decoder already flushed; no more input accepted */
+        /* EAGAIN: output is pending - loop back and drain. NEVER drop the
+           packet on EAGAIN. INVALIDDATA: the decoder consumed/rejected the
+           corrupt packet; draining next is the correct recovery. Other
+           negative codes are fatal. */
+        if (ret < 0 && ret != AVERROR(EAGAIN) && ret != AVERROR_INVALIDDATA)
+            return NULL;
     }
 }
 

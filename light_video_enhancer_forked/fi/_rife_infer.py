@@ -13,7 +13,7 @@ for directory in (HERE, PACKAGE_ROOT):
     if directory not in sys.path:
         sys.path.insert(0, directory)
 
-from _rife_model import FlownetCas
+from _rife_model import RIFE_TORCH_ARCHITECTURES
 from _shared_frames import SharedNDArray, read_framed, write_framed
 
 
@@ -53,7 +53,9 @@ def _load_model(args):
     torch.set_grad_enabled(False)
     # RIFE uses fixed shapes, but cuDNN search costs several seconds per job.
     torch.backends.cudnn.benchmark = False
-    model = FlownetCas().to(device).eval()
+    arch = RIFE_TORCH_ARCHITECTURES[
+        args.get("arch", "FlownetCas")]
+    model = arch().to(device).eval()
     path = args.get("model_path", "")
     if not os.path.isfile(path):
         raise FileNotFoundError("The model weights do not exist: %s" % path)
@@ -62,7 +64,11 @@ def _load_model(args):
         state = state["state_dict"]
     if any(key.startswith("module.") for key in state):
         state = {key.replace("module.", "", 1): value for key, value in state.items()}
-    model.load_state_dict(state, strict=False)
+    missing, unexpected = model.load_state_dict(state, strict=False)
+    if missing:
+        raise RuntimeError(
+            "The weights do not match the %s architecture (%d missing keys)"
+            % (arch.__name__, len(missing)))
     fp16 = bool(args.get("fp16", True))
     if fp16:
         model.half()

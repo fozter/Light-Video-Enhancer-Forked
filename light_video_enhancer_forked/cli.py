@@ -7,6 +7,7 @@ from typing import Optional
 from ._logging import get_logger
 from .config import EncodeConfig, ProcessConfig
 from .encoding import CLI_CODEC_CHOICES, canonical_codec
+from .fi.rife import RIFE_TORCH_MODEL_TOKENS
 from .fi.rife_ncnn import RIFE_NCNN_MODEL_TOKENS
 
 _log = get_logger(__name__)
@@ -122,9 +123,13 @@ def build_parser() -> argparse.ArgumentParser:
                         choices=["ultra", "fast", "balanced", "quality"],
                         help="interpolation quality")
     parser.add_argument("--fi-model", default=None,
-                        choices=list(RIFE_NCNN_MODEL_TOKENS),
-                        help="RIFE ncnn model, used when the interpolation "
-                             "engine is rife_ncnn (4.20 ... 4.27_fluidframes)")
+                        choices=list(RIFE_TORCH_MODEL_TOKENS) + [
+                            token for token in RIFE_NCNN_MODEL_TOKENS
+                            if token not in RIFE_TORCH_MODEL_TOKENS],
+                        help="RIFE model, used when the interpolation engine "
+                             "is rife (PyTorch) or rife_ncnn "
+                             "(4.20 ... 4.27_fluidframes; the valid set "
+                             "depends on the engine)")
     parser.add_argument("--fi-multiplier", type=int, default=None,
                         help="interpolation multiplier (default: 2, or the smallest "
                              "grid that covers --fps)")
