@@ -1265,9 +1265,9 @@ public sealed partial class MainPage : Page
         {
             throw new ArgumentException("OSDEnhancer already includes 2x interpolation; set the separate interpolation engine to None.");
         }
-        if ((srEngine == "span" || fiEngine == "ifrnet_ncnn") && SelectedTag(NcnnGpuBox, "auto") == "cpu")
+        if ((srEngine == "span" || fiEngine == "ifrnet_ncnn" || fiEngine == "rife_ncnn") && SelectedTag(NcnnGpuBox, "auto") == "cpu")
         {
-            throw new ArgumentException("SPAN and IFRNet require a Vulkan GPU; set NCNN Device to Auto or a GPU index.");
+            throw new ArgumentException("SPAN, IFRNet, and RIFE ncnn-vulkan require a Vulkan GPU; set NCNN Device to Auto or a GPU index.");
         }
 
         List<string> values =

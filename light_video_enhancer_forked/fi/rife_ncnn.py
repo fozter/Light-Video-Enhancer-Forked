@@ -35,6 +35,8 @@ from light_video_enhancer_forked._logging import get_logger
 from light_video_enhancer_forked._paths import (
     get_model_dir, get_pkg_dir, model_file_exists)
 from light_video_enhancer_forked.ncnn_contract import NcnnInterpolationStage
+from light_video_enhancer_forked.fi._scene_detect import (
+    PAIR_NORMAL, classify_pair, skipped_intermediates)
 
 _log = get_logger(__name__)
 
@@ -170,8 +172,61 @@ class RIFENcnnEngine(FrameInterpolationEngine):
         return bool(self._pad_width or self._pad_height)
 
     def interpolate(self, frame0: np.ndarray, frame1: np.ndarray) -> List[np.ndarray]:
-        sequence = self.interpolate_batch([frame0, frame1])
+        if frame0.shape != frame1.shape:
+            raise ValueError("RIFE ncnn input frame dimensions do not match")
+        pair_mode = classify_pair(frame0, frame1)
+        if pair_mode != PAIR_NORMAL:
+            return skipped_intermediates(
+                frame0, frame1, self._multiplier, pair_mode)
+        sequence = self._batch_interpolate([frame0, frame1])
         return sequence[1:-1]
+
+    def _batch_interpolate(self, frames: List[np.ndarray]) -> List[np.ndarray]:
+        """Internal batch processing without scene detection."""
+        target_count = (len(frames) - 1) * self._multiplier + 1
+        with tempfile.TemporaryDirectory(prefix="lve_rife_") as work:
+            input_dir = os.path.join(work, "input")
+            output_dir = os.path.join(work, "output")
+            write_frames((self._pad_frame(f) for f in frames), input_dir,
+                         "RIFE ncnn")
+            self._run_batch(input_dir, output_dir, len(frames))
+            padded = read_frames(output_dir, target_count, self._tile_size(),
+                                 "RIFE ncnn")
+            return [self._crop_frame(f) for f in padded]
+
+    def interpolate_batch(self, frames: List[np.ndarray]) -> List[np.ndarray]:
+        if not frames:
+            return []
+        if len(frames) == 1:
+            return [frames[0].copy()]
+        pair_modes = [classify_pair(f0, f1)
+                      for f0, f1 in zip(frames, frames[1:])]
+        # Fast path: all pairs are normal, use the batch executable directly.
+        if all(mode == PAIR_NORMAL for mode in pair_modes):
+            return self._batch_interpolate(frames)
+        # Scene detection fallback: process consecutive normal pairs as
+        # segments and use skipped-interpolation for static/scene-cut pairs.
+        output: List[np.ndarray] = [frames[0].copy()]
+        index = 0
+        while index < len(frames) - 1:
+            # Find the longest segment of consecutive normal pairs.
+            end = index
+            while end < len(frames) - 1 and pair_modes[end] == PAIR_NORMAL:
+                end += 1
+            if end > index:
+                segment = frames[index:end + 1]
+                result = self._batch_interpolate(segment)
+                # Skip the first frame of the segment (already in output).
+                output.extend(result[1:])
+                index = end
+            else:
+                mode = pair_modes[index]
+                output.extend(skipped_intermediates(
+                    frames[index], frames[index + 1],
+                    self._multiplier, mode))
+                output.append(frames[index + 1].copy())
+                index += 1
+        return output
 
     def _run_batch(self, input_dir: str, output_dir: str,
                    input_count: int) -> int:
@@ -201,44 +256,34 @@ class RIFENcnnEngine(FrameInterpolationEngine):
         validate_outputs(output_dir, target_count, "RIFE ncnn")
         return target_count
 
-    def interpolate_batch(self, frames: List[np.ndarray]) -> List[np.ndarray]:
-        if not frames:
-            return []
-        if len(frames) == 1:
-            return [frames[0].copy()]
-        target_count = (len(frames) - 1) * self._multiplier + 1
-        with tempfile.TemporaryDirectory(prefix="lve_rife_") as work:
-            input_dir = os.path.join(work, "input")
-            output_dir = os.path.join(work, "output")
-            write_frames((self._pad_frame(f) for f in frames), input_dir,
-                         "RIFE ncnn")
-            self._run_batch(input_dir, output_dir, len(frames))
-            padded = read_frames(output_dir, target_count, self._tile_size(),
-                                 "RIFE ncnn")
-            return [self._crop_frame(f) for f in padded]
-
     def process_directory(self, input_dir: str, output_dir: str,
                           input_count: int) -> int:
         """Run one directory job at native size (padded transparently)."""
         if input_count < 2:
             raise ValueError("RIFE ncnn directory batching needs at least 2 frames")
         make_directory(output_dir)
-        if not self._needs_padding():
-            self._run_batch(input_dir, output_dir, input_count)
-            return (input_count - 1) * self._multiplier + 1
-        source = read_frames(input_dir, input_count, (self._width, self._height),
+        frames = read_frames(input_dir, input_count, (self._width, self._height),
                              "RIFE ncnn")
+        pair_modes = [classify_pair(f0, f1)
+                      for f0, f1 in zip(frames, frames[1:])]
         target_count = (input_count - 1) * self._multiplier + 1
-        with tempfile.TemporaryDirectory(prefix="lve_rife_pad_") as work:
-            padded_dir = os.path.join(work, "padded")
-            result_dir = os.path.join(work, "result")
-            write_frames((self._pad_frame(f) for f in source), padded_dir,
-                         "RIFE ncnn")
-            self._run_batch(padded_dir, result_dir, input_count)
-            padded = read_frames(result_dir, target_count, self._tile_size(),
-                                 "RIFE ncnn")
-            write_frames((self._crop_frame(f) for f in padded), output_dir,
-                         "RIFE ncnn")
+        if all(mode == PAIR_NORMAL for mode in pair_modes):
+            if not self._needs_padding():
+                self._run_batch(input_dir, output_dir, input_count)
+                return target_count
+            with tempfile.TemporaryDirectory(prefix="lve_rife_pad_") as work:
+                padded_dir = os.path.join(work, "padded")
+                result_dir = os.path.join(work, "result")
+                write_frames((self._pad_frame(f) for f in frames), padded_dir,
+                             "RIFE ncnn")
+                self._run_batch(padded_dir, result_dir, input_count)
+                padded = read_frames(result_dir, target_count, self._tile_size(),
+                                     "RIFE ncnn")
+                write_frames((self._crop_frame(f) for f in padded), output_dir,
+                             "RIFE ncnn")
+            return target_count
+        result = self.interpolate_batch(frames)
+        write_frames(result, output_dir, "RIFE ncnn")
         return target_count
 
     def native_ncnn_stage(self) -> NcnnInterpolationStage:
